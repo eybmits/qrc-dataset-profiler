@@ -12,14 +12,14 @@ dependencies = [
     "scipy>=1.11",
     "scikit-learn>=1.3",
     "pandas>=2.1",
-    "pyarrow>=14",
-    "statsmodels>=0.14",
     "matplotlib>=3.8",
 ]
 
 [project.optional-dependencies]
-# Tier-B backstop (completeness check); profiler must degrade gracefully if absent.
-backstop = ["pycatch22>=0.4", "tsfresh>=0.20"]
+# All optional: the profiler must run + degrade gracefully (NaN / CSV fallback) if absent.
+io = ["pyarrow>=14"]              # parquet output; else CSV fallback
+stats = ["statsmodels>=0.14"]    # ADF/KPSS; else built-in numpy implementation
+backstop = ["pycatch22>=0.4", "tsfresh>=0.20"]  # Tier-B completeness check
 dev = ["pytest>=8"]
 
 [tool.setuptools.packages.find]
