@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Sequence
 
 import numpy as np
 from numpy.typing import NDArray
@@ -90,11 +90,14 @@ def esn_matched_baseline(
     qrc_cfg: StandardSpinV1 | None = None,
     reservoir_size: int | None = None,
     seed: int = 0,
+    esn_grid: dict[str, Sequence[float]] | None = None,
     return_details: bool = False,
     **kwargs: Any,
 ) -> float | dict[str, Any]:
     """Dimension-matched leaky ESN selected on validation NRMSE."""
 
+    if esn_grid is None and "grid" in kwargs:
+        esn_grid = kwargs["grid"]
     u, y = _task_from_args(series, inputs, kwargs.get("task_type"), kwargs.get("horizon"))
     size = int(reservoir_size if reservoir_size is not None else (qrc_cfg or StandardSpinV1()).feature_dim)
     if size < 1:
@@ -103,12 +106,13 @@ def esn_matched_baseline(
     u_scaled, _, _ = _standardize_vector_train(u, splits.train)
     win_raw = _cycle_input(size, seed)
     w_raw = _cycle_reservoir(size)
+    grid = _normalize_esn_grid(esn_grid)
 
     best: dict[str, Any] | None = None
-    for rho in (0.7, 0.9, 1.0, 1.1, 1.3):
+    for rho in grid["rho"]:
         w = _scale_spectral_radius(w_raw, rho)
-        for leak in (0.1, 0.3, 0.6, 1.0):
-            for input_scale in (0.3, 1.0, 2.0):
+        for leak in grid["leak"]:
+            for input_scale in grid["input_scale"]:
                 states = _run_esn(u_scaled, w, win_raw * input_scale, leak)
                 scores = _ridge_scores(states, y, splits)
                 cand = {
@@ -125,6 +129,23 @@ def esn_matched_baseline(
                     best = cand
     assert best is not None
     return best if return_details else float(best["nrmse"])
+
+
+def _normalize_esn_grid(esn_grid: dict[str, Sequence[float]] | None) -> dict[str, tuple[float, ...]]:
+    defaults = {
+        "rho": (0.7, 0.9, 1.0, 1.1, 1.3),
+        "leak": (0.1, 0.3, 0.6, 1.0),
+        "input_scale": (0.3, 1.0, 2.0),
+    }
+    if esn_grid is None:
+        return defaults
+    out: dict[str, tuple[float, ...]] = {}
+    for key, default in defaults.items():
+        vals = tuple(float(v) for v in esn_grid.get(key, default))
+        if not vals:
+            raise ValueError(f"ESN grid entry {key!r} must not be empty")
+        out[key] = vals
+    return out
 
 
 def qrc_nrmse(ds: Dataset, cfg: StandardSpinV1, seed: int = 0) -> float:
