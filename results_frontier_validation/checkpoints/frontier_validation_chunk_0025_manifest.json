@@ -1,0 +1,46 @@
+{
+  "comparison_protocol": "standard_v3",
+  "output_stem": "frontier_validation_chunk_0025",
+  "qrc": {
+    "class": "StandardSpinV1",
+    "n_qubits": 6,
+    "J": 1.2,
+    "h": 1.0,
+    "dt": 0.2,
+    "depth": 5,
+    "topology": "ring",
+    "virtual_nodes": 5,
+    "reupload": false,
+    "amplitude_damping": 0.0,
+    "dephasing": 0.0,
+    "dissipation_method": "trajectory",
+    "feature_dim": 60,
+    "encoding": "train_split_scaled_input_qubit_injection_no_rz_reupload_with_fixed_local_dissipation",
+    "hyperparameter_selection": "selected_once_on_held_out_calibration_set_then_frozen"
+  },
+  "primary_esn": "frozen_sparse_random_leaky_esn",
+  "esn": {
+    "class": "frozen_sparse_random_leaky_esn",
+    "reservoir_size": 60,
+    "density": 0.1,
+    "bias_scale": 0.2,
+    "hyperparameter_selection": "selected_once_on_held_out_calibration_set_then_frozen",
+    "grid": {
+      "rho": [
+        0.7
+      ],
+      "leak": [
+        0.6
+      ],
+      "input_scale": [
+        0.3
+      ]
+    },
+    "readout": "ridge alpha selected on validation split; same protocol as QRC"
+  },
+  "calibration_config": "results_calibration_v3/frozen_config.json",
+  "seed_count": 3,
+  "fast": true,
+  "smoke": false,
+  "claim_boundary": "Dataset categorization only; not a broad quantum-advantage or mechanism claim."
+}

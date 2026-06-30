@@ -1,0 +1,139 @@
+{
+  "analysis_version": "v5-multi-qrc-atlas-v1",
+  "comparison_protocol": "standard_v5_multi_qrc",
+  "protocol_layer": "globally_frozen_multi_qrc_vs_canonical_esn",
+  "calibration_data": {
+    "source": "synthetic held-out v4 taxonomy sweep variants",
+    "sweep_seed": 1501,
+    "sweep_n_per_template": 1,
+    "rows_per_family": 1,
+    "n_rows": 16,
+    "families": [
+      "chaotic_flow",
+      "chaotic_map",
+      "colored_noise",
+      "delay_dynamics",
+      "heavy_tail_jump",
+      "input_driven_memory",
+      "intermittent_sparse",
+      "linear_stochastic",
+      "long_range",
+      "multiscale_composite",
+      "nonlinear_autoregressive",
+      "oscillatory_quasiperiodic",
+      "regime_switching",
+      "seasonal_calendar",
+      "unit_root_trend",
+      "volatility_heteroskedastic"
+    ],
+    "fast": true
+  },
+  "qrc_variants": {
+    "qrc_m": {
+      "variant": "qrc_m",
+      "description": "mechanistic disordered spin-QRC: input injection/reset only, no RZ reuploading, no dissipation",
+      "class": "StandardSpinV1",
+      "n_qubits": 6,
+      "J": 1.0,
+      "h": 1.0,
+      "dt": 0.25,
+      "depth": 5,
+      "topology": "complete",
+      "virtual_nodes": 3,
+      "reupload": false,
+      "amplitude_damping": 0.0,
+      "dephasing": 0.0,
+      "dissipation_method": "trajectory",
+      "coupling_mode": "disordered",
+      "coupling_seed": 314159,
+      "feature_dim": 63,
+      "hyperparameter_selection": "selected_once_on_same_held_out_calibration_set_then_frozen"
+    },
+    "qrc_e": {
+      "variant": "qrc_e",
+      "description": "encoding-enhanced disordered spin-QRC: input injection plus fixed RZ reuploading",
+      "class": "StandardSpinV1",
+      "n_qubits": 6,
+      "J": 1.0,
+      "h": 1.0,
+      "dt": 0.25,
+      "depth": 5,
+      "topology": "complete",
+      "virtual_nodes": 3,
+      "reupload": true,
+      "amplitude_damping": 0.0,
+      "dephasing": 0.0,
+      "dissipation_method": "trajectory",
+      "coupling_mode": "disordered",
+      "coupling_seed": 314159,
+      "feature_dim": 63,
+      "hyperparameter_selection": "selected_once_on_same_held_out_calibration_set_then_frozen"
+    },
+    "qrc_d": {
+      "variant": "qrc_d",
+      "description": "dissipative disordered spin-QRC: input injection plus fixed mild local dissipation",
+      "class": "StandardSpinV1",
+      "n_qubits": 6,
+      "J": 1.0,
+      "h": 1.0,
+      "dt": 0.25,
+      "depth": 5,
+      "topology": "complete",
+      "virtual_nodes": 3,
+      "reupload": false,
+      "amplitude_damping": 0.02,
+      "dephasing": 0.01,
+      "dissipation_method": "trajectory",
+      "coupling_mode": "disordered",
+      "coupling_seed": 314159,
+      "feature_dim": 63,
+      "hyperparameter_selection": "selected_once_on_same_held_out_calibration_set_then_frozen"
+    }
+  },
+  "esn": {
+    "class": "frozen_sparse_random_leaky_esn",
+    "reservoir_size": 63,
+    "density": 0.1,
+    "bias_scale": 0.2,
+    "rho": 0.9,
+    "leak": 0.6,
+    "input_scale": 1.0,
+    "hyperparameter_selection": "selected_once_on_same_held_out_calibration_set_then_frozen"
+  },
+  "scores": {
+    "qrc": {
+      "qrc_m": {
+        "best_mean_val_nrmse": 0.9013561305499889,
+        "best_mean_test_nrmse_on_calibration": 0.9745585586618604,
+        "n_candidates": 1
+      },
+      "qrc_e": {
+        "best_mean_val_nrmse": 1.0183416144910362,
+        "best_mean_test_nrmse_on_calibration": 1.032897943098543,
+        "n_candidates": 1
+      },
+      "qrc_d": {
+        "best_mean_val_nrmse": 1.1264600069490462,
+        "best_mean_test_nrmse_on_calibration": 1.1408371994630162,
+        "n_candidates": 1
+      }
+    },
+    "esn": {
+      "best_mean_val_nrmse": 0.8061018645257843,
+      "best_mean_test_nrmse_on_calibration": 0.8970628232410305,
+      "n_candidates": 1
+    }
+  },
+  "selection_metric": "mean validation NRMSE across held-out calibration datasets and reservoir seeds",
+  "selection_tolerance": 0.005,
+  "no_per_dataset_tuning": true,
+  "claim_boundary": "v5 supports a regime-atlas comparison of globally frozen canonical QRC mechanisms against a globally frozen canonical ESN. It does not establish broad quantum advantage.",
+  "outputs": [
+    "calibration_catalog.csv",
+    "qrc_m_calibration_scores.csv",
+    "qrc_e_calibration_scores.csv",
+    "qrc_d_calibration_scores.csv",
+    "esn_calibration_scores.csv",
+    "frozen_v5_config.json"
+  ]
+}

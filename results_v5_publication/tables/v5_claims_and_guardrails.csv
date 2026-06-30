@@ -1,0 +1,6 @@
+claim_type,statement,evidence
+main_result,"Globally frozen canonical QRC variants do not beat the globally frozen ESN on average, but useful QRC regimes are non-random and measurable.",Validation win rate 32.4%; useful rate 12.5%; mean best-QRC advantage -0.058.
+regime_map,QRC usefulness is concentrated in specific dataset-property regimes rather than broad chaos/nonlinearity classes.,Top validation family unit_root_trend has useful rate 47.9%; discovery-trained validation AUC 0.836.
+anti_circularity,The signal is not only a direct predictability-proxy artifact.,"Without predictability proxies: validation AUC 0.834, PR-AUC 0.432. Without chaos/nonlinearity/complexity: validation AUC 0.831."
+rule_pocket,The map yields readable high-usefulness pockets that can guide practitioner triage.,"ext_trend_strength percentile > 0.92 and ext_spectral_centroid percentile <= 0.18 and ext_spectral_centroid percentile > 0.03 (n=420, useful=47.4%, mean_adv=+0.209)"
+guardrail,Do not call this broad quantum advantage or a mechanism proof.,The primary comparison is protocol-local: globally frozen QRC mechanisms versus a globally frozen feature-matched ESN.

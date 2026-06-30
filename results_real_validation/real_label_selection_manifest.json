@@ -1,0 +1,29 @@
+{
+  "analysis_version": "real-external-validation-v1",
+  "artifact": "real_label_selection",
+  "prediction_table": "results_real_validation/real_window_predictions.csv",
+  "n_rows": 24,
+  "seed": 0,
+  "selection_uses_real_labels": false,
+  "selection_roles": {
+    "domain_balanced": 6,
+    "ood_guardrail": 6,
+    "predicted_promising": 6,
+    "predicted_unfavorable": 6
+  },
+  "domains": {
+    "electricity_load": 2,
+    "electricity_transformer": 3,
+    "environment": 1,
+    "exchange_rate": 2,
+    "m4_monthly": 11,
+    "solar_activity": 2,
+    "transport": 1,
+    "weather": 2
+  },
+  "claim_boundary": "Selection uses only predictions/support/source metadata, not real QRC/ESN outcomes.",
+  "outputs": [
+    "real_label_selection.csv",
+    "real_label_selection_manifest.json"
+  ]
+}

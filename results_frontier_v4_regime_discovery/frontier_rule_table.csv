@@ -1,0 +1,6 @@
+rule,n,qrc_useful_rate,qrc_win_rate,mean_advantage
+ext_trend_strength > 0.579,321,0.3644859813084112,0.4143302180685358,-0.009987763288525877
+ext_trend_strength <= 0.579 and ext_spectral_centroid <= 0.075 and pred_nrmse_gbm > 0.449,988,0.16093117408906882,0.2520242914979757,-0.1581215432811288
+ext_trend_strength <= 0.579 and ext_spectral_centroid <= 0.075 and pred_nrmse_gbm <= 0.449,1855,0.06522911051212937,0.1261455525606469,-0.2721334148026392
+ext_trend_strength <= 0.579 and ext_spectral_centroid > 0.075 and ext_volatility_ac1 > 0.293,1934,0.05532574974146846,0.30248190279214066,-0.06596817389085845
+ext_trend_strength <= 0.579 and ext_spectral_centroid > 0.075 and ext_volatility_ac1 <= 0.293,4902,0.018563851489188085,0.18931048551611587,-0.08120298766242968

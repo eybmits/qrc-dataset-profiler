@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frontier QRC Regime Map Figures</title>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #FCFCFD; color: #1F2430; }
+    header { padding: 32px 6vw 20px; background: white; border-bottom: 1px solid #D7DBE7; }
+    main { padding: 24px 6vw 48px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 18px; }
+    .card { background: white; border: 1px solid #D7DBE7; border-radius: 8px; padding: 14px; }
+    .card span { display: block; color: #6F768A; font-size: 12px; text-transform: uppercase; }
+    .card strong { display: block; margin-top: 6px; font-size: 24px; }
+    section { margin: 28px 0 40px; }
+    img { width: 100%; max-width: 1300px; display: block; border: 1px solid #D7DBE7; background: white; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Frontier QRC Regime Map Figures</h1>
+    <p>Prospective validation figures for the frozen standard_v3 QRC-vs-ESN protocol.</p>
+    <div class="cards">
+      <div class="card"><span>Prospective R2</span><strong>0.382</strong></div>
+      <div class="card"><span>Prospective AUC</span><strong>0.807</strong></div>
+      <div class="card"><span>Prospective PR-AUC</span><strong>0.240</strong></div>
+      <div class="card"><span>Top Family</span><strong>unit root trend</strong></div>
+    </div>
+  </header>
+  <main><section><h2>Frontier 01 Validation Regime Map</h2><p>All validation rows in 30-feature space with family useful rates and advantage distribution.</p><img src='frontier_01_validation_regime_map.png' alt='Frontier 01 Validation Regime Map'></section>
+<section><h2>Frontier 02 Prospective Meta Model</h2><p>Prospective prediction, calibration, feature importance, and grouped validation diagnostics.</p><img src='frontier_02_prospective_meta_model.png' alt='Frontier 02 Prospective Meta Model'></section>
+<section><h2>Frontier 03 All Points Feature Regressions</h2><p>All validation points plotted against the top meta-model features with regression bands.</p><img src='frontier_03_all_points_feature_regressions.png' alt='Frontier 03 All Points Feature Regressions'></section>
+<section><h2>Frontier 04 Rules And Claim Boundary</h2><p>Rule pockets, family distributions, split agreement, and claim-boundary diagnostics.</p><img src='frontier_04_rules_and_claim_boundary.png' alt='Frontier 04 Rules And Claim Boundary'></section></main>
+</body>
+</html>

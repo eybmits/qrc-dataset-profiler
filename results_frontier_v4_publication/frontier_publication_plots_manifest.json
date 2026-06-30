@@ -1,0 +1,83 @@
+{
+  "analysis_version": "frontier-publication-plots-v1",
+  "frontier_atlas_version": "frontier-atlas-v1",
+  "inputs": {
+    "discovery_table": "results_frontier_v4_discovery/frontier_discovery_evaluated_30_features.csv",
+    "validation_table": "results_frontier_v4_validation/frontier_validation_evaluated_30_features.csv",
+    "discovery_analysis_dir": "results_frontier_v4_regime_discovery",
+    "validation_analysis_dir": "results_frontier_v4_regime_validation"
+  },
+  "n_discovery": 10000,
+  "n_validation": 10000,
+  "n_features_declared": 30,
+  "n_features_used": 26,
+  "prospective_metrics": {
+    "n": 10000.0,
+    "regression_r2": 0.38197775189678473,
+    "regression_mae": 0.11462683605069442,
+    "classification_roc_auc": 0.806973393813446,
+    "classification_pr_auc": 0.24016860184926098,
+    "classification_brier": 0.0511941942808912
+  },
+  "top_features": [
+    "ext_trend_strength",
+    "ext_psd_slope",
+    "pred_nrmse_gbm",
+    "ext_spectral_centroid",
+    "nl_gain",
+    "ac_timescale",
+    "lyapunov",
+    "ext_volatility_ac1",
+    "dfa_alpha",
+    "r2_linear"
+  ],
+  "figures": [
+    {
+      "stem": "frontier_01_validation_regime_map",
+      "title": "Frontier 01 Validation Regime Map",
+      "caption": "All validation rows in 30-feature space with family useful rates and advantage distribution.",
+      "png": "frontier_01_validation_regime_map.png",
+      "pdf": "frontier_01_validation_regime_map.pdf"
+    },
+    {
+      "stem": "frontier_02_prospective_meta_model",
+      "title": "Frontier 02 Prospective Meta Model",
+      "caption": "Prospective prediction, calibration, feature importance, and grouped validation diagnostics.",
+      "png": "frontier_02_prospective_meta_model.png",
+      "pdf": "frontier_02_prospective_meta_model.pdf"
+    },
+    {
+      "stem": "frontier_03_all_points_feature_regressions",
+      "title": "Frontier 03 All Points Feature Regressions",
+      "caption": "All validation points plotted against the top meta-model features with regression bands.",
+      "png": "frontier_03_all_points_feature_regressions.png",
+      "pdf": "frontier_03_all_points_feature_regressions.pdf"
+    },
+    {
+      "stem": "frontier_04_rules_and_claim_boundary",
+      "title": "Frontier 04 Rules And Claim Boundary",
+      "caption": "Rule pockets, family distributions, split agreement, and claim-boundary diagnostics.",
+      "png": "frontier_04_rules_and_claim_boundary.png",
+      "pdf": "frontier_04_rules_and_claim_boundary.pdf"
+    }
+  ],
+  "outputs": [
+    "FRONTIER_PUBLICATION_PLOTS_REPORT.md",
+    "frontier_01_validation_regime_map.pdf",
+    "frontier_01_validation_regime_map.png",
+    "frontier_02_prospective_meta_model.pdf",
+    "frontier_02_prospective_meta_model.png",
+    "frontier_03_all_points_feature_regressions.pdf",
+    "frontier_03_all_points_feature_regressions.png",
+    "frontier_04_rules_and_claim_boundary.pdf",
+    "frontier_04_rules_and_claim_boundary.png",
+    "frontier_discovery_trained_importances.csv",
+    "frontier_prospective_predictions.csv",
+    "frontier_publication_metrics.csv",
+    "frontier_validation_family_summary.csv",
+    "index.html",
+    "frontier_publication_plots_manifest.json"
+  ],
+  "report": "FRONTIER_PUBLICATION_PLOTS_REPORT.md",
+  "claim_boundary": "Figures support a conditional, protocol-local regime-map claim for frozen standard_v3 QRC vs ESN. They do not establish broad average QRC superiority or a fundamental quantum advantage."
+}

@@ -1,0 +1,58 @@
+{
+  "analysis_version": "scientific-plots-v1",
+  "n_rows": 1000,
+  "n_families": 9,
+  "figures": [
+    {
+      "stem": "fig1_dense_atlas_summary",
+      "title": "Fig1 Dense Atlas Summary",
+      "caption": "Dense atlas summary with row-level map, distributions, family intervals, and family prediction alignment.",
+      "png": "fig1_dense_atlas_summary.png",
+      "pdf": "fig1_dense_atlas_summary.pdf"
+    },
+    {
+      "stem": "fig2_dense_feature_regressions",
+      "title": "Fig2 Dense Feature Regressions",
+      "caption": "All-point feature regressions with fitted trends and confidence bands.",
+      "png": "fig2_dense_feature_regressions.png",
+      "pdf": "fig2_dense_feature_regressions.pdf"
+    },
+    {
+      "stem": "fig3_dense_family_feature_matrix",
+      "title": "Fig3 Dense Family Feature Matrix",
+      "caption": "Family-level core and extended feature matrix with useful rates and effect intervals.",
+      "png": "fig3_dense_family_feature_matrix.png",
+      "pdf": "fig3_dense_family_feature_matrix.pdf"
+    },
+    {
+      "stem": "fig4_dense_model_validation",
+      "title": "Fig4 Dense Model Validation",
+      "caption": "Meta-model prediction, calibration, confusion, robustness, and importance diagnostics.",
+      "png": "fig4_dense_model_validation.png",
+      "pdf": "fig4_dense_model_validation.pdf"
+    },
+    {
+      "stem": "fig5_dense_attribution_guardrail",
+      "title": "Fig5 Dense Attribution Guardrail",
+      "caption": "Dense paired coupled-vs-J=0 attribution-control diagnostics.",
+      "png": "fig5_dense_attribution_guardrail.png",
+      "pdf": "fig5_dense_attribution_guardrail.pdf"
+    }
+  ],
+  "outputs": [
+    "SCIENTIFIC_PLOTS_REPORT.md",
+    "fig1_dense_atlas_summary.pdf",
+    "fig1_dense_atlas_summary.png",
+    "fig2_dense_feature_regressions.pdf",
+    "fig2_dense_feature_regressions.png",
+    "fig3_dense_family_feature_matrix.pdf",
+    "fig3_dense_family_feature_matrix.png",
+    "fig4_dense_model_validation.pdf",
+    "fig4_dense_model_validation.png",
+    "fig5_dense_attribution_guardrail.pdf",
+    "fig5_dense_attribution_guardrail.png",
+    "index.html",
+    "scientific_plots_manifest.json"
+  ],
+  "claim_boundary": "Dense scientific plots support dataset categorization and meta-model interpretation. They do not claim broad average QRC superiority or a quantum coupling mechanism."
+}

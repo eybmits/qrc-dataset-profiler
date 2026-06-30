@@ -1,0 +1,22 @@
+{
+  "analysis_version": "frontier-atlas-v1",
+  "artifact": "evaluated_selection",
+  "selection_path": "results_frontier_v4_selection/frontier_evaluation_selection.csv",
+  "split": "discovery",
+  "comparison_protocol": "standard_v3",
+  "calibration_config": "results_calibration_v4/frozen_config.json",
+  "fast": true,
+  "smoke": false,
+  "seed_count": 3,
+  "checkpoint_every": 10,
+  "total_chunks": 1000,
+  "n_rows": 10000,
+  "n_finite_qrc_advantage": 150,
+  "qrc_feature_dim": 100,
+  "complete": false,
+  "claim_boundary": "Evaluated frontier rows support conditional protocol-local QRC usefulness claims only.",
+  "outputs": [
+    "frontier_discovery_evaluated_30_features_partial.csv",
+    "frontier_discovery_evaluation_manifest.json"
+  ]
+}

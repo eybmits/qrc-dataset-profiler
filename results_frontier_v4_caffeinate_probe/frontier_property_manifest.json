@@ -1,0 +1,56 @@
+{
+  "analysis_version": "frontier-atlas-v4",
+  "artifact": "property_atlas",
+  "taxonomy": "v4",
+  "n_rows": 1,
+  "requested_n_per_template": 1,
+  "sweep_seed": 0,
+  "fast": true,
+  "smoke": false,
+  "max_rows": 1,
+  "checkpoint_every": 1,
+  "n_tier_a_features": 30,
+  "tier_a_features": [
+    "ac_timescale",
+    "ami_first_min",
+    "mem_capacity",
+    "r2_linear",
+    "nl_gain",
+    "snr_db",
+    "lyapunov",
+    "zero_one_K",
+    "spectral_entropy",
+    "dom_freq",
+    "spectral_flatness",
+    "adf_p",
+    "kpss_p",
+    "n_diffs",
+    "dfa_alpha",
+    "perm_entropy",
+    "sample_entropy",
+    "hurst_rs",
+    "forecastability",
+    "pred_nrmse_gbm",
+    "predictability_gap_linear_gbm",
+    "ext_volatility_ac1",
+    "ext_arch_lm5",
+    "ext_recurrence_rate",
+    "ext_recurrence_determinism",
+    "ext_psd_slope",
+    "ext_spectral_centroid",
+    "ext_trend_strength",
+    "ext_changepoint_count",
+    "ext_lz_complexity"
+  ],
+  "families": {
+    "delay_dynamics": 1
+  },
+  "base_generators": {
+    "mackey_glass": 1
+  },
+  "claim_boundary": "Property-only candidate atlas. No QRC/ESN targets are used for candidate selection.",
+  "outputs": [
+    "frontier_property_atlas.csv",
+    "frontier_property_manifest.json"
+  ]
+}

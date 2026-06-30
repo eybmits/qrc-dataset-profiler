@@ -1,0 +1,19 @@
+{
+  "analysis_version": "publication-package-v1",
+  "inputs": {
+    "atlas_dir": "results_atlas_v2",
+    "analysis_dir": "results_analysis_v2",
+    "attribution_dir": "results_quantum_attribution_v2"
+  },
+  "n_rows": 1000,
+  "n_families": 9,
+  "outputs": [
+    "ATLAS_REPORT.md",
+    "fig1_qrc_usefulness_atlas.pdf",
+    "fig1_qrc_usefulness_atlas.png",
+    "fig2_evidence_controls.pdf",
+    "fig2_evidence_controls.png"
+  ],
+  "claim_boundary": "Publication figures support a dataset-categorization and meta-model claim. They do not claim broad average QRC superiority or fundamental quantum advantage.",
+  "report_headline": "The 1000-row atlas identifies 36 QRC-useful datasets, with nonstationary as the clearest useful family."
+}

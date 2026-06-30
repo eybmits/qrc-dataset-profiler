@@ -1,0 +1,2 @@
+feature_dim,rho,leak,input_scale,mean_val_nrmse,median_val_nrmse,mean_test_nrmse,median_test_nrmse
+63,0.9,0.6,1.0,0.8061018645257843,0.9435647977991137,0.8970628232410305,0.9609709455155941

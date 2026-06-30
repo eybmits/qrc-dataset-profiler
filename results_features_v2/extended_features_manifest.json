@@ -1,0 +1,12 @@
+{
+  "feature_table_version": "tier-b-v1",
+  "n_rows": 1000,
+  "n_features": 24,
+  "sweep": true,
+  "fast": true,
+  "smoke": false,
+  "sweep_n_per_family": 20,
+  "sweep_seed": 0,
+  "output": "extended_features_sweep.csv",
+  "claim_boundary": "Tier-B features are exploratory robustness descriptors, not replacements for the frozen schema-v1 core axes."
+}

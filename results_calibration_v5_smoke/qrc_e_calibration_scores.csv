@@ -1,0 +1,2 @@
+variant,n_qubits,J,h,dt,depth,topology,virtual_nodes,reupload,amplitude_damping,dephasing,coupling_mode,coupling_seed,feature_dim,mean_val_nrmse,median_val_nrmse,mean_test_nrmse,median_test_nrmse
+qrc_e,6,1.0,1.0,0.25,5,complete,3,True,0.0,0.0,disordered,314159,63,1.0183416144910362,0.9965801414016779,1.032897943098543,0.9965388067984496

@@ -1,0 +1,18 @@
+{
+  "analysis_version": "frontier-atlas-v1",
+  "artifact": "atlas_support_scores",
+  "discovery_table_path": "results_frontier_v4_smoke_selection_120/discovery_selected_rows.csv",
+  "target_table_path": "results_frontier_v4_smoke_selection_120/validation_selected_rows.csv",
+  "n_discovery": 20,
+  "n_target": 20,
+  "k_values": [
+    3,
+    5
+  ],
+  "n_ood": 0,
+  "claim_boundary": "Support scores are discovery-fitted validity guardrails, not proof that a prediction is correct.",
+  "outputs": [
+    "frontier_support_scores.csv",
+    "frontier_support_manifest.json"
+  ]
+}

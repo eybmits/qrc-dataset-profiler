@@ -1,0 +1,28 @@
+{
+  "analysis_version": "v5-multi-qrc-atlas-v1",
+  "artifact": "evaluated_v5_multi_qrc_selection",
+  "split": "validation",
+  "calibration_config": "results_calibration_v5/frozen_v5_config.json",
+  "complete": true,
+  "n_rows": 10000,
+  "n_labeled": 10000,
+  "feature_dim": 63,
+  "qrc_variants": [
+    "qrc_m",
+    "qrc_e",
+    "qrc_d"
+  ],
+  "target_columns": [
+    "advantage_qrc_m_vs_esn",
+    "advantage_qrc_e_vs_esn",
+    "advantage_qrc_d_vs_esn",
+    "best_qrc_variant",
+    "best_qrc_advantage_vs_esn",
+    "qrc_any_useful"
+  ],
+  "claim_boundary": "v5 evaluated rows support a broad QRC-vs-ESN regime atlas, not a broad quantum-advantage claim.",
+  "outputs": [
+    "frontier_validation_evaluated_v5_multi_qrc.csv",
+    "frontier_validation_v5_manifest.json"
+  ]
+}

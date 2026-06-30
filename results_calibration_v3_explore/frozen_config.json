@@ -1,0 +1,65 @@
+{
+  "analysis_version": "global-reservoir-calibration-v1",
+  "protocol_layer": "fixed_vs_fixed_primary_fairness",
+  "comparison_protocol": "standard_v3",
+  "calibration_data": {
+    "source": "synthetic held-out sweep variants",
+    "sweep_seed": 917,
+    "sweep_n_per_family": 1,
+    "rows_per_family": 1,
+    "n_rows": 9,
+    "families": [
+      "chaotic_flow",
+      "chaotic_map",
+      "colored_noise",
+      "input_driven",
+      "linear_stochastic",
+      "long_range",
+      "nonlinear_stochastic",
+      "nonstationary",
+      "oscillatory"
+    ],
+    "fast": true
+  },
+  "selection_metric": "mean validation NRMSE across held-out calibration datasets and seeds",
+  "qrc": {
+    "class": "StandardSpinV1",
+    "n_qubits": 6,
+    "J": 1.2,
+    "h": 1.0,
+    "dt": 0.25,
+    "depth": 5,
+    "topology": "ring",
+    "virtual_nodes": 5,
+    "reupload": false,
+    "amplitude_damping": 0.0,
+    "dephasing": 0.0,
+    "dissipation_method": "trajectory",
+    "feature_dim": 60,
+    "encoding": "train_split_scaled_input_qubit_injection_no_rz_reupload_with_fixed_local_dissipation",
+    "hyperparameter_selection": "selected_once_on_held_out_calibration_set_then_frozen"
+  },
+  "esn": {
+    "class": "frozen_sparse_random_leaky_esn",
+    "reservoir_size": 60,
+    "density": 0.1,
+    "bias_scale": 0.2,
+    "rho": 1.1,
+    "leak": 0.6,
+    "input_scale": 0.3,
+    "hyperparameter_selection": "selected_once_on_held_out_calibration_set_then_frozen"
+  },
+  "scores": {
+    "best_qrc_mean_val_nrmse": 0.8035350815212942,
+    "best_qrc_mean_test_nrmse_on_calibration": 0.7881001813037052,
+    "best_esn_mean_val_nrmse": 0.7373400288163743,
+    "best_esn_mean_test_nrmse_on_calibration": 0.747803740345472
+  },
+  "outputs": [
+    "calibration_catalog.csv",
+    "esn_calibration_scores.csv",
+    "frozen_config.json",
+    "qrc_calibration_scores.csv"
+  ],
+  "claim_boundary": "This calibration only selects global reservoir hyperparameters for a fair fixed-vs-fixed atlas. It does not use evaluation-atlas test labels and does not establish quantum advantage."
+}

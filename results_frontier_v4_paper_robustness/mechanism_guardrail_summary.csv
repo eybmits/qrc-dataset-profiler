@@ -1,0 +1,6 @@
+subset_group,n,mean_delta_J0_minus_J1,median_delta_J0_minus_J1,frac_J1_better_than_J0,mean_delta_diss_minus_nodiss,frac_dissipative_better_than_nodiss,claim_boundary
+overall,24,0.18896422598539644,0.16347066140990907,0.875,0.2573562895964868,0.125,subset guardrail only; not a mechanism proof
+background_control,6,0.12853547551336122,0.14886056194438296,1.0,0.17613572995331417,0.0,subset guardrail only; not a mechanism proof
+chaotic_control,6,0.2376376512064422,0.2129931192050904,1.0,0.3138987787926075,0.0,subset guardrail only; not a mechanism proof
+periodic_control,6,0.4813289450812499,0.29314866995400785,1.0,0.5400235895425048,0.0,subset guardrail only; not a mechanism proof
+target_pocket,6,-0.09164516785946764,-0.11781126558473617,0.5,-0.0006329399024793311,0.5,subset guardrail only; not a mechanism proof

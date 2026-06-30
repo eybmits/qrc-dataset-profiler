@@ -1,0 +1,76 @@
+{
+  "analysis_version": "qrc-power-audit-v1",
+  "scope": "post-hoc balanced validation subset, seed 0 only, diagnostic not headline evidence",
+  "n_rows": 108,
+  "families": {
+    "chaotic_flow": 12,
+    "chaotic_map": 12,
+    "colored_noise": 12,
+    "input_driven": 12,
+    "linear_stochastic": 12,
+    "long_range": 12,
+    "nonlinear_stochastic": 12,
+    "nonstationary": 12,
+    "oscillatory": 12
+  },
+  "frozen_esn_grid": {
+    "rho": [
+      0.7
+    ],
+    "leak": [
+      0.6
+    ],
+    "input_scale": [
+      0.3
+    ]
+  },
+  "variants": [
+    "standard_v3_current_6q60",
+    "clean_capacity_10q100",
+    "clean_deeper_8q112",
+    "encoding_reupload_6q60"
+  ],
+  "best_by_mean_qrc_nrmse": {
+    "variant": "clean_capacity_10q100",
+    "n_rows": 108,
+    "n_qubits": 10,
+    "depth": 5,
+    "virtual_nodes": 5,
+    "feature_dim": 100,
+    "reupload": false,
+    "mean_qrc_nrmse": 0.9736058224506151,
+    "median_qrc_nrmse": 0.9919486529274981,
+    "mean_matched_esn_nrmse": 0.8952557404045905,
+    "median_matched_esn_nrmse": 0.9670500790164819,
+    "mean_advantage_vs_matched_esn": -0.07835008204602453,
+    "median_advantage_vs_matched_esn": -0.016240818729545914,
+    "qrc_win_rate_vs_matched_esn": 0.28703703703703703,
+    "qrc_useful_rate_vs_matched_esn": 0.19444444444444445,
+    "seconds": 51.19429397583008
+  },
+  "best_by_advantage_vs_matched_esn": {
+    "variant": "standard_v3_current_6q60",
+    "n_rows": 108,
+    "n_qubits": 6,
+    "depth": 5,
+    "virtual_nodes": 5,
+    "feature_dim": 60,
+    "reupload": false,
+    "mean_qrc_nrmse": 0.9736109691414326,
+    "median_qrc_nrmse": 0.9932380700362672,
+    "mean_matched_esn_nrmse": 0.9197164218790235,
+    "median_matched_esn_nrmse": 0.9847132737005457,
+    "mean_advantage_vs_matched_esn": -0.05389454726240899,
+    "median_advantage_vs_matched_esn": -0.02126629330606398,
+    "qrc_win_rate_vs_matched_esn": 0.3055555555555556,
+    "qrc_useful_rate_vs_matched_esn": 0.24074074074074073,
+    "seconds": 18.999412059783936
+  },
+  "elapsed_seconds": 146.131000995636,
+  "claim_boundary": "Diagnostic only; uses validation labels for sampling and must not replace frozen atlas protocol results.",
+  "outputs": [
+    "validation_power_audit_sample.csv",
+    "validation_power_audit_summary.csv",
+    "validation_power_audit_details.csv"
+  ]
+}

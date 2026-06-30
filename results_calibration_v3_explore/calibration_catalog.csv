@@ -1,0 +1,10 @@
+name,family,source,task_type,seed,length,horizon,params
+lorenz63_rho23.17_s000_snr10db,chaotic_flow,synthetic,forecast,91709001,800,7,"{'generator': 'lorenz63', 'rho': 23.17077271050705, 'dt': 0.02, 'noise_overlay': True, 'snr_db': 10.0}"
+ikeda_u0.809_s000,chaotic_map,synthetic,forecast,91702900,800,2,"{'generator': 'ikeda_map', 'u': 0.8088211124380148}"
+colored_noise_b0.755_s000,colored_noise,synthetic,forecast,91702400,800,4,"{'generator': 'colored_noise', 'beta': 0.7547693286412295}"
+linear_memory_lag18_s000_snr5db,input_driven,synthetic,input_driven,91709003,800,1,"{'generator': 'linear_memory', 'lag': 18, 'noise_overlay': True, 'snr_db': 5.0}"
+arma22_s000,linear_stochastic,synthetic,forecast,91704000,800,2,"{'generator': 'arma', 'phi': [-0.7799482467307074, -0.6841993732365443], 'theta': [-0.5473696669251591, 0.16332288615984675]}"
+fbm_h0.755_s000_snr20db,long_range,synthetic,forecast,91709005,800,2,"{'generator': 'fbm', 'H': 0.7549973963944842, 'noise_overlay': True, 'snr_db': 20.0}"
+setar_t0.18_s000,nonlinear_stochastic,synthetic,forecast,91704300,800,1,"{'generator': 'setar', 'threshold': 0.18109013502864446, 'high_phi': 0.49830307953391284}"
+regime_switch_ar_p0.038_s000,nonstationary,synthetic,forecast,91702600,800,4,"{'generator': 'regime_switch_ar', 'p_switch': 0.03810448182209567, 'phis': [(0.7137299932698364, -0.1803207848156087), (-0.6287432523380589, 0.11967921518439131)], 'sigmas': [0.25, 0.5]}"
+van_der_pol_mu0.70_s000,oscillatory,synthetic,forecast,91703700,800,25,"{'generator': 'van_der_pol', 'mu': 0.7037721891269482, 'dt': 0.05}"

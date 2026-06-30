@@ -1,0 +1,53 @@
+{
+  "analysis_version": "usefulness-atlas-v1",
+  "seed": 0,
+  "win_threshold": 0.05,
+  "tie_margin": 0.05,
+  "n_rows": 1000,
+  "families": [
+    "chaotic_flow",
+    "chaotic_map",
+    "colored_noise",
+    "input_driven",
+    "linear_stochastic",
+    "long_range",
+    "nonlinear_stochastic",
+    "nonstationary",
+    "oscillatory"
+  ],
+  "features_used": [
+    "ac_timescale",
+    "ami_first_min",
+    "mem_capacity",
+    "r2_linear",
+    "nl_gain",
+    "snr_db",
+    "lyapunov",
+    "zero_one_K",
+    "spectral_entropy",
+    "dom_freq",
+    "adf_p",
+    "kpss_p",
+    "dfa_alpha",
+    "perm_entropy",
+    "sample_entropy",
+    "pred_nrmse_gbm"
+  ],
+  "label_definition": {
+    "qrc_useful": "qrc_advantage >= 0.05",
+    "near_tie": "-0.05 <= qrc_advantage < 0.05",
+    "baseline_preferred": "qrc_advantage < -0.05"
+  },
+  "claim_boundary": "This atlas categorizes dataset regimes where the fixed Spin-QRC is useful relative to matched baselines. It is not a fundamental quantum-advantage claim.",
+  "outputs": [
+    "atlas_importances.csv",
+    "atlas_importances.png",
+    "family_usefulness_categories.png",
+    "family_usefulness_summary.csv",
+    "meta_model_summary.csv",
+    "predicted_vs_actual_usefulness.png",
+    "property_usefulness_map.png",
+    "qrc_usefulness_map.csv",
+    "usefulness_atlas_manifest.json"
+  ]
+}

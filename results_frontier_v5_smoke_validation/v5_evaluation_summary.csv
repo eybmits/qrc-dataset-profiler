@@ -1,0 +1,5 @@
+group,n,mean_advantage_qrc_m,win_rate_qrc_m,useful_rate_qrc_m,mean_advantage_qrc_e,win_rate_qrc_e,useful_rate_qrc_e,mean_advantage_qrc_d,win_rate_qrc_d,useful_rate_qrc_d,mean_best_qrc_advantage,best_qrc_win_rate,best_qrc_useful_rate,most_common_best_variant
+overall,6,-0.3770175385712801,0.0,0.0,-0.5223156810099961,0.0,0.0,-0.8950586531551904,0.0,0.0,-0.3749898438424138,0.0,0.0,qrc_m
+family:chaotic_flow,2,-0.41718628038783884,0.0,0.0,-0.5249520673438797,0.0,0.0,-0.8839559879206241,0.0,0.0,-0.41110319620123986,0.0,0.0,qrc_e
+family:chaotic_map,3,-0.2172382169533814,0.0,0.0,-0.3597130572366218,0.0,0.0,-0.9101440615563741,0.0,0.0,-0.2172382169533814,0.0,0.0,qrc_m
+family:oscillatory_quasiperiodic,1,-0.7760180197918585,0.0,0.0,-1.0048507796623527,0.0,0.0,-0.8720077584207713,0.0,0.0,-0.7760180197918585,0.0,0.0,qrc_m

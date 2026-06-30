@@ -1,0 +1,42 @@
+The benchmark is designed to avoid two common confounds: per-dataset reservoir tuning and post-hoc model selection. We calibrate QRC and ESN hyperparameters once on held-out synthetic calibration datasets, then freeze them for the atlas evaluation.
+
+\subsection{Frozen QRC variants}
+
+All QRC variants use a six-qubit disordered transverse-field spin reservoir with complete coupling topology, five internal layers, and three virtual nodes, giving 63 measured features. QRC-M uses input injection without repeated reuploading or dissipation. QRC-E uses the same reservoir with fixed input reuploading, motivated by practical QRC feature-map protocols and by the need to expose encoding contributions explicitly~\cite{govia2022nonlinear}. QRC-D uses the same reservoir with mild local dissipation, reflecting the current view that dissipation can be a useful design axis in QRC~\cite{sannia2024dissipation}. Calibration selects one global setting per variant: QRC-M uses \(J=1.5, dt=0.25\), QRC-E uses \(J=1.0, dt=0.25\), and QRC-D uses \(J=1.0, dt=0.15\) with mild damping.
+
+\begin{table}[!t]
+\centering
+\caption{Frozen reservoirs used in the benchmark. All reservoirs are calibrated once, then reused without per-dataset tuning.}
+\label{tab:reservoir-protocols}
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\columnwidth}{@{}lXc@{}}
+\toprule
+Model & Role in the paper & Dim. \\
+\midrule
+QRC-M & Mechanistic spin-QRC with input injection only. Tests the fixed coupled reservoir dynamics with minimal extra encoding. & 63 \\
+QRC-E & Same spin reservoir with fixed repeated input reuploading. Tests a practical encoding-enhanced QRC feature map. & 63 \\
+QRC-D & Same spin reservoir with mild dissipation. Tests a realistic open-system QRC design axis. & 63 \\
+ESN & Sparse random leaky ESN with globally calibrated spectral radius, leak, and input scale. Primary classical comparator. & 63 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Frozen ESN comparator}
+
+The ESN is a canonical sparse random leaky reservoir with the same feature dimension as QRC. The global calibration selects spectral radius 0.7, leak 0.3, and input scale 0.3. Once selected, the ESN is frozen for every atlas row. This ensures that the benchmark measures dataset-regime sensitivity rather than per-dataset reservoir optimization.
+
+The ESN is intentionally the primary comparator because it is the closest classical analogue of QRC: both models use fixed recurrent dynamics and train only a linear readout. Linear ridge, gradient boosting, and NVAR are retained as contextual baselines, but the headline label is always QRC versus ESN. This keeps the title claim narrow: the paper maps empirical QRC advantage relative to the traditional reservoir-computing baseline, not relative to every possible forecasting method.
+
+\subsection{Dataset descriptors and meta-model}
+
+Each dataset is profiled by 30 Tier-A descriptors. The original 20 core descriptors include autocorrelation time, mutual-information minimum, memory capacity, linear predictability, nonlinear-gain contrast, signal-to-noise ratio, Lyapunov and 0--1 chaos diagnostics, spectral entropy, dominant frequency, stationarity tests, differencing order, scaling exponents, permutation/sample entropy, Hurst estimate, forecastability, and GBM predictability. Ten additional descriptors capture predictability gaps, volatility memory, ARCH structure, recurrence, spectral slope/centroid, trend strength, changepoints, and Lempel--Ziv complexity.
+
+The descriptors are organized into six interpretable blocks: memory and persistence; predictability; spectrum and oscillation; nonstationarity and drift; noise and volatility; and nonlinear, chaotic, entropy, and recurrence structure. The blocks are intentionally redundant at the measurement level. For example, slow structure can appear as a high autocorrelation timescale, a large scaling exponent, low spectral centroid, strong trend score, or a stationarity-test signal. The meta-model is allowed to combine these partially overlapping views, while the ablation suite checks that the result is not carried by one proxy family.
+
+The meta-model is trained only on discovery rows and evaluated once on validation rows. It uses gradient-boosted trees for regression on \(A_i\) and classification of \(A_i\geq 0.05\). We report ROC-AUC and PR-AUC because useful QRC cases are rare. Feature-set ablations test whether the signal survives after removing direct predictability proxies or restricting to persistence/spectral/nonstationarity descriptors.
+
+\subsection{Quantum-advantage triage}
+
+The output is a triage map, not a universal model ranking. Given a new dataset, the practitioner measures the descriptors \(z_i\), locates the dataset in the atlas, and estimates whether QRC is worth testing. We call this \emph{dataset-level quantum-advantage triage}: identifying plausible empirical QRC advantage before investing in quantum-reservoir evaluation.

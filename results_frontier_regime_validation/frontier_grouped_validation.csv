@@ -1,0 +1,3 @@
+group_col,n_groups,n_splits,regression_r2_mean,regression_mae_mean,classification_roc_auc_mean,classification_pr_auc_mean
+base_generator,49,5,0.03827042791943667,0.18065874130637577,0.7629503289078061,0.1488488490911627
+family,9,5,-3.306170399847565,0.319554553768102,0.5114496090545344,0.0866191733219879

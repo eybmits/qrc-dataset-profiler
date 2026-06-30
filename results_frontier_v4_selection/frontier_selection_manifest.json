@@ -1,0 +1,48 @@
+{
+  "analysis_version": "frontier-atlas-v1",
+  "artifact": "evaluation_selection",
+  "property_atlas_path": "results_frontier_v4_property/frontier_property_atlas.csv",
+  "n_property_rows": 50000,
+  "n_selected": 20000,
+  "n_discovery": 10000,
+  "n_validation": 10000,
+  "selection_protocol": "v4",
+  "selection_uses_targets": false,
+  "target_columns_ignored": [
+    "nrmse_linear",
+    "nrmse_esn_matched",
+    "nrmse_qrc_spin",
+    "nrmse_gbm",
+    "qrc_advantage"
+  ],
+  "selection_roles": {
+    "broad_balanced": 7000,
+    "feature_space_coverage": 5000,
+    "frontier_enriched": 4000,
+    "perturbation_axis": 2000,
+    "v3_informed_stress_control": 2000
+  },
+  "families_selected": {
+    "chaotic_flow": 2313,
+    "chaotic_map": 4106,
+    "colored_noise": 633,
+    "delay_dynamics": 456,
+    "heavy_tail_jump": 561,
+    "input_driven_memory": 2830,
+    "intermittent_sparse": 261,
+    "linear_stochastic": 693,
+    "long_range": 1069,
+    "multiscale_composite": 619,
+    "nonlinear_autoregressive": 547,
+    "oscillatory_quasiperiodic": 1493,
+    "regime_switching": 641,
+    "seasonal_calendar": 529,
+    "unit_root_trend": 690,
+    "volatility_heteroskedastic": 2559
+  },
+  "claim_boundary": "Selection is target-free and must be frozen before QRC/ESN labels are computed.",
+  "outputs": [
+    "frontier_evaluation_selection.csv",
+    "frontier_selection_manifest.json"
+  ]
+}

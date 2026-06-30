@@ -117,8 +117,73 @@ def esn_matched_baseline(
                 scores = _ridge_scores(states, y, splits)
                 cand = {
                     "nrmse": scores["test_nrmse"],
+                    "nmae": scores["test_nmae"],
                     "val_nrmse": scores["val_nrmse"],
+                    "val_nmae": scores["val_nmae"],
                     "reservoir_size": size,
+                    "washout": splits.train.start or 0,
+                    "rho": rho,
+                    "leak": leak,
+                    "input_scale": input_scale,
+                    "alpha": scores["alpha"],
+                }
+                if best is None or cand["val_nrmse"] < best["val_nrmse"]:
+                    best = cand
+    assert best is not None
+    return best if return_details else float(best["nrmse"])
+
+
+def esn_sparse_baseline(
+    series: Any,
+    inputs: np.ndarray | None = None,
+    *,
+    qrc_cfg: StandardSpinV1 | None = None,
+    reservoir_size: int | None = None,
+    seed: int = 0,
+    esn_grid: dict[str, Sequence[float]] | None = None,
+    density: float = 0.1,
+    bias_scale: float = 0.2,
+    return_details: bool = False,
+    **kwargs: Any,
+) -> float | dict[str, Any]:
+    """Canonical sparse random leaky ESN, dimension matched to the QRC features.
+
+    This is the publication-facing ESN control: a tanh reservoir with random
+    sparse recurrent weights, dense input weights, fixed bias scale, validation
+    selection over the standard spectral-radius/leak/input-scale grid, and the
+    same ridge readout protocol used by the QRC.
+    """
+
+    if esn_grid is None and "grid" in kwargs:
+        esn_grid = kwargs["grid"]
+    u, y = _task_from_args(series, inputs, kwargs.get("task_type"), kwargs.get("horizon"))
+    size = int(reservoir_size if reservoir_size is not None else (qrc_cfg or StandardSpinV1()).feature_dim)
+    if size < 1:
+        raise ValueError("reservoir_size must be positive")
+    splits = _protocol_splits(y.size)
+    u_scaled, _, _ = _standardize_vector_train(u, splits.train)
+    rng = np.random.default_rng(seed)
+    win_raw = rng.uniform(-1.0, 1.0, size=size).astype(np.float64)
+    bias_raw = rng.uniform(-1.0, 1.0, size=size).astype(np.float64) * float(bias_scale)
+    w_raw = _sparse_random_reservoir(size, density=density, rng=rng)
+    grid = _normalize_esn_grid(esn_grid)
+
+    best: dict[str, Any] | None = None
+    for rho in grid["rho"]:
+        w = _scale_spectral_radius(w_raw, rho)
+        for leak in grid["leak"]:
+            for input_scale in grid["input_scale"]:
+                states = _run_esn_sparse(u_scaled, w, win_raw * input_scale, bias_raw, leak)
+                scores = _ridge_scores(states, y, splits)
+                cand = {
+                    "baseline": "sparse_random_leaky_esn",
+                    "nrmse": scores["test_nrmse"],
+                    "nmae": scores["test_nmae"],
+                    "val_nrmse": scores["val_nrmse"],
+                    "val_nmae": scores["val_nmae"],
+                    "reservoir_size": size,
+                    "density": float(density),
+                    "bias_scale": float(bias_scale),
                     "washout": splits.train.start or 0,
                     "rho": rho,
                     "leak": leak,
@@ -156,6 +221,24 @@ def qrc_nrmse(ds: Dataset, cfg: StandardSpinV1, seed: int = 0) -> float:
     features = seeded_cfg.transform(u)
     splits = _protocol_splits(min(features.shape[0], y.size))
     return evaluate_readout(features, y, splits)
+
+
+def qrc_nrmse_standard(ds: Dataset, cfg: StandardSpinV1, seed: int = 0) -> float:
+    """Run the frozen publication QRC path with train-split-only input scaling."""
+
+    return qrc_scores_standard(ds, cfg, seed=seed)["test_nrmse"]
+
+
+def qrc_scores_standard(ds: Dataset, cfg: StandardSpinV1, seed: int = 0) -> dict[str, float]:
+    """Run the frozen publication QRC path and return validation/test readout scores."""
+
+    u, y = build_task(ds)
+    n = min(u.size, y.size)
+    splits = _protocol_splits(n)
+    seeded_cfg = replace(cfg, seed=seed)
+    u01 = _scale_drive_to_unit_interval_train(u[:n], splits.train)
+    features = seeded_cfg.transform(u01, inputs_are_scaled=True)
+    return _ridge_scores(features, y[:n], splits)
 
 
 def _task_from_args(
@@ -269,6 +352,11 @@ def _standardize_vector_train(y: np.ndarray, train: slice) -> tuple[FloatArray, 
     return ((y - mu) / sd).astype(np.float64), mu, sd
 
 
+def _scale_drive_to_unit_interval_train(u: np.ndarray, train: slice) -> FloatArray:
+    uz, _, _ = _standardize_vector_train(u, train)
+    return (0.5 * (np.tanh(uz) + 1.0)).astype(np.float64)
+
+
 def _ridge_scores(features: np.ndarray, y: np.ndarray, splits: Splits | None = None) -> dict[str, float]:
     X = np.asarray(features, dtype=np.float64)
     yy = _finite_fill(np.asarray(y, dtype=np.float64).reshape(-1))
@@ -282,6 +370,7 @@ def _ridge_scores(features: np.ndarray, y: np.ndarray, splits: Splits | None = N
 
     best_alpha = float(_ALPHAS[0])
     best_val = np.inf
+    best_val_nmae = np.inf
     for alpha in _ALPHAS:
         model = Ridge(alpha=float(alpha))
         model.fit(Xs[splits.train], yz[splits.train])
@@ -289,13 +378,20 @@ def _ridge_scores(features: np.ndarray, y: np.ndarray, splits: Splits | None = N
         val = _nrmse(yy[splits.val], pred_val)
         if val < best_val:
             best_val = val
+            best_val_nmae = _nmae(yy[splits.val], pred_val)
             best_alpha = float(alpha)
 
     train_val = _join_train_val_indices(splits)
     model = Ridge(alpha=best_alpha)
     model.fit(Xs[train_val], yz[train_val])
     pred_test = model.predict(Xs[splits.test]) * y_sd + y_mu
-    return {"test_nrmse": _nrmse(yy[splits.test], pred_test), "val_nrmse": float(best_val), "alpha": best_alpha}
+    return {
+        "test_nrmse": _nrmse(yy[splits.test], pred_test),
+        "test_nmae": _nmae(yy[splits.test], pred_test),
+        "val_nrmse": float(best_val),
+        "val_nmae": float(best_val_nmae),
+        "alpha": best_alpha,
+    }
 
 
 def _join_train_val_indices(splits: Splits) -> np.ndarray:
@@ -306,6 +402,7 @@ def _join_train_val_indices(splits: Splits) -> np.ndarray:
 # nonstationary holdout). Cap it so a single blown-up baseline (chirp ESN hit 25.8)
 # cannot create a giant spurious qrc_advantage outlier that would dominate the meta-model.
 NRMSE_CAP = 2.0
+NMAE_CAP = 2.0
 
 
 def _nrmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -317,6 +414,17 @@ def _nrmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     if not np.isfinite(nrmse):
         return NRMSE_CAP
     return float(min(nrmse, NRMSE_CAP))
+
+
+def _nmae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    y_true = np.asarray(y_true, dtype=np.float64).reshape(-1)
+    y_pred = np.asarray(y_pred, dtype=np.float64).reshape(-1)
+    mae = float(np.mean(np.abs(y_true - y_pred)))
+    scale = float(np.std(y_true))
+    nmae = mae / max(scale, 1e-12)
+    if not np.isfinite(nmae):
+        return NMAE_CAP
+    return float(min(nmae, NMAE_CAP))
 
 
 def _scale_spectral_radius(w: FloatArray, rho: float) -> FloatArray:
@@ -340,12 +448,35 @@ def _cycle_reservoir(size: int) -> FloatArray:
     return w
 
 
+def _sparse_random_reservoir(size: int, *, density: float, rng: np.random.Generator) -> FloatArray:
+    size = int(size)
+    density = float(np.clip(density, 1.0 / max(size, 1), 1.0))
+    w = rng.normal(0.0, 1.0, size=(size, size))
+    mask = rng.random((size, size)) < density
+    w = np.where(mask, w, 0.0)
+    np.fill_diagonal(w, 0.0)
+    if not np.any(w):
+        w[(np.arange(size) + 1) % size, np.arange(size)] = 1.0
+    return w.astype(np.float64)
+
+
 def _run_esn(u: FloatArray, w: FloatArray, win: FloatArray, leak: float) -> FloatArray:
     states = np.empty((u.size, win.size), dtype=np.float64)
     x = np.zeros(win.size, dtype=np.float64)
     leak = float(leak)
     for t, u_t in enumerate(u):
         proposal = np.tanh(win * float(u_t) + w @ x)
+        x = (1.0 - leak) * x + leak * proposal
+        states[t] = x
+    return states
+
+
+def _run_esn_sparse(u: FloatArray, w: FloatArray, win: FloatArray, bias: FloatArray, leak: float) -> FloatArray:
+    states = np.empty((u.size, win.size), dtype=np.float64)
+    x = np.zeros(win.size, dtype=np.float64)
+    leak = float(leak)
+    for t, u_t in enumerate(u):
+        proposal = np.tanh(bias + win * float(u_t) + w @ x)
         x = (1.0 - leak) * x + leak * proposal
         states[t] = x
     return states

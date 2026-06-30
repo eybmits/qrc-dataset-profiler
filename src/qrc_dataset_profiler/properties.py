@@ -78,7 +78,9 @@ def profile_dataset(ds: Dataset) -> DatasetRecord:
     if isinstance(pred, dict):
         rec.r2_linear = pred["r2_linear"]
         rec.nl_gain = pred["nl_gain"]
+        rec.pred_nrmse_linear = pred["pred_nrmse_linear"]
         rec.pred_nrmse_gbm = pred["pred_nrmse_gbm"]
+        rec.predictability_gap_linear_gbm = pred["predictability_gap_linear_gbm"]
 
     snr_value, snr_valid = _safe_pair("snr_db", lambda: _snr_db(source_train, target_train))
     rec.snr_db = snr_value
@@ -110,6 +112,8 @@ def profile_dataset(ds: Dataset) -> DatasetRecord:
     rec.dfa_valid = dfa_valid
 
     rec.perm_entropy = _safe("perm_entropy", lambda: _perm_entropy(source_train))
+    rec.sample_entropy = _safe("sample_entropy", lambda: _sample_entropy(source_train, m=2))
+    rec.hurst_rs = _safe("hurst_rs", lambda: _hurst_rs(source_train))
 
     for key, value in ds.ground_truth.items():
         if hasattr(rec, key):
@@ -118,9 +122,9 @@ def profile_dataset(ds: Dataset) -> DatasetRecord:
 
 
 def compute_backstop(series: np.ndarray) -> dict[str, float]:
-    """Return optional Tier-B features when optional packages exist."""
+    """Return deterministic Tier-B features plus optional package backstops."""
 
-    out: dict[str, float] = {}
+    out: dict[str, float] = compute_extended_features(series)
     x = _finite_fill(_as_1d(series))
     try:
         import pycatch22  # type: ignore
@@ -139,6 +143,46 @@ def compute_backstop(series: np.ndarray) -> dict[str, float]:
     except Exception:
         pass
     return out
+
+
+def compute_extended_features(series: np.ndarray) -> dict[str, float]:
+    """Compute deterministic Tier-B time-series descriptors.
+
+    These are kept outside schema v1 so the core explanatory model remains stable.
+    They provide a wider feature bank for reviewer checks and later feature-set
+    comparisons without relying on optional packages.
+    """
+
+    raw = _finite_fill(_as_1d(series))
+    x = _zscore(raw)
+    recurrence = _recurrence_features(x)
+    features: dict[str, float] = {
+        "ext_sample_entropy_m2": _sample_entropy(x, m=2),
+        "ext_approx_entropy_m2": _approx_entropy(x, m=2),
+        "ext_lz_complexity": _lz_complexity_binary(x),
+        "ext_hurst_rs": _hurst_rs(x),
+        "ext_psd_slope": _psd_slope(x),
+        "ext_spectral_centroid": _spectral_moment(x, moment="centroid"),
+        "ext_spectral_bandwidth": _spectral_moment(x, moment="bandwidth"),
+        "ext_spectral_rolloff85": _spectral_rolloff(x, q=0.85),
+        "ext_zero_crossing_rate": _zero_crossing_rate(x),
+        "ext_turning_point_rate": _turning_point_rate(x),
+        "ext_outlier_rate_3sigma": _outlier_rate(x, threshold=3.0),
+        "ext_spike_rate_mad6": _spike_rate(raw),
+        "ext_arch_lm5": _arch_lm_stat(x, lags=5),
+        "ext_volatility_ac1": _volatility_ac1(x),
+        "ext_trend_strength": _trend_strength(raw),
+        "ext_seasonality_strength": _seasonality_strength(x),
+        "ext_changepoint_count": float(_changepoint_count(raw)),
+        "ext_recurrence_rate": recurrence["recurrence_rate"],
+        "ext_recurrence_determinism": recurrence["determinism"],
+        "ext_fnn_fraction": _false_nearest_fraction(x),
+        "ext_corr_dim_approx": _corr_dim_approx(x),
+        "ext_bds_like": _bds_like(x),
+        "ext_zero_fraction": _zero_fraction(raw),
+        "ext_cv2_positive": _cv2_positive(raw),
+    }
+    return features
 
 
 def count_spectral_peaks(series: np.ndarray, max_peaks: int = 32) -> int:
@@ -264,12 +308,17 @@ def _predictive_models(source: np.ndarray, target: np.ndarray, seed: int) -> dic
     gbm.fit(Xtr, ytr)
     pred_gbm = gbm.predict(Xte)
     r2_gbm = float(np.clip(r2_score(yte, pred_gbm), -1.0, 1.0))
-    rmse = float(np.sqrt(np.mean((pred_gbm - yte) ** 2)))
+    rmse_lin = float(np.sqrt(np.mean((pred_lin - yte) ** 2)))
+    rmse_gbm = float(np.sqrt(np.mean((pred_gbm - yte) ** 2)))
     scale = float(np.std(yte))
+    nrmse_lin = rmse_lin / max(scale, 1e-12)
+    nrmse_gbm = rmse_gbm / max(scale, 1e-12)
     return {
         "r2_linear": r2_lin,
         "nl_gain": r2_gbm - r2_lin,
-        "pred_nrmse_gbm": rmse / max(scale, 1e-12),
+        "pred_nrmse_linear": nrmse_lin,
+        "pred_nrmse_gbm": nrmse_gbm,
+        "predictability_gap_linear_gbm": nrmse_lin - nrmse_gbm,
     }
 
 
@@ -567,3 +616,361 @@ def _perm_entropy(x: np.ndarray, order: int = 4, delay: int = 1) -> float:
     counts = np.array(list(Counter(patterns).values()), dtype=float)
     p = counts / np.sum(counts)
     return float(-np.sum(p * np.log(p + 1e-15)) / np.log(math.factorial(order)))
+
+
+def _sample_entropy(x: np.ndarray, m: int = 2, r: float | None = None) -> float:
+    x = _zscore(x)
+    if x.size > 700:
+        idx = np.linspace(0, x.size - 1, 700, dtype=int)
+        x = x[idx]
+    if x.size < m + 3:
+        return math.nan
+    tol = float(0.2 * np.std(x) if r is None else r)
+    if tol <= 0:
+        return math.nan
+
+    def count_matches(order: int) -> int:
+        n = x.size - order + 1
+        if n <= 1:
+            return 0
+        emb = np.column_stack([x[i : i + n] for i in range(order)])
+        count = 0
+        for i in range(n - 1):
+            d = np.max(np.abs(emb[i + 1 :] - emb[i]), axis=1)
+            count += int(np.sum(d <= tol))
+        return count
+
+    a = count_matches(m + 1)
+    b = count_matches(m)
+    if a <= 0 or b <= 0:
+        return math.nan
+    return float(-np.log(a / b))
+
+
+def _approx_entropy(x: np.ndarray, m: int = 2, r: float | None = None) -> float:
+    x = _zscore(x)
+    if x.size > 700:
+        idx = np.linspace(0, x.size - 1, 700, dtype=int)
+        x = x[idx]
+    tol = float(0.2 * np.std(x) if r is None else r)
+    if x.size < m + 3 or tol <= 0:
+        return math.nan
+
+    def phi(order: int) -> float:
+        n = x.size - order + 1
+        emb = np.column_stack([x[i : i + n] for i in range(order)])
+        vals = []
+        for i in range(n):
+            d = np.max(np.abs(emb - emb[i]), axis=1)
+            vals.append(np.mean(d <= tol))
+        vals = np.maximum(np.asarray(vals, dtype=float), 1e-12)
+        return float(np.mean(np.log(vals)))
+
+    return float(phi(m) - phi(m + 1))
+
+
+def _lz_complexity_binary(x: np.ndarray) -> float:
+    x = _finite_fill(x)
+    if x.size < 4:
+        return math.nan
+    bits = "".join("1" if v > np.median(x) else "0" for v in x)
+    seen: set[str] = set()
+    count = 0
+    i = 0
+    while i < len(bits):
+        j = i + 1
+        while j <= len(bits) and bits[i:j] in seen:
+            j += 1
+        seen.add(bits[i:j])
+        count += 1
+        i = j
+    n = max(len(bits), 2)
+    return float(count * np.log2(n) / n)
+
+
+def _hurst_rs(x: np.ndarray) -> float:
+    x = _finite_fill(x)
+    n = x.size
+    if n < 128:
+        return math.nan
+    sizes = np.unique(np.logspace(np.log10(16), np.log10(max(32, n // 4)), num=10).astype(int))
+    rs_vals = []
+    used = []
+    for size in sizes:
+        if size < 8 or n // size < 3:
+            continue
+        vals = []
+        for start in range(0, (n // size) * size, size):
+            seg = x[start : start + size]
+            centered = seg - np.mean(seg)
+            z = np.cumsum(centered)
+            R = float(np.max(z) - np.min(z))
+            S = float(np.std(seg))
+            if S > 1e-12 and R > 0:
+                vals.append(R / S)
+        if vals:
+            rs_vals.append(float(np.mean(vals)))
+            used.append(size)
+    if len(used) < 4:
+        return math.nan
+    return float(np.polyfit(np.log(used), np.log(rs_vals), 1)[0])
+
+
+def _welch_psd(x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    x = _zscore(x)
+    if x.size < 16:
+        return np.asarray([]), np.asarray([])
+    freqs, psd = signal.welch(x, nperseg=min(512, x.size))
+    psd = np.asarray(psd, dtype=float)
+    freqs = np.asarray(freqs, dtype=float)
+    keep = freqs > 0
+    return freqs[keep], np.maximum(psd[keep], 1e-15)
+
+
+def _psd_slope(x: np.ndarray) -> float:
+    freqs, psd = _welch_psd(x)
+    if freqs.size < 8:
+        return math.nan
+    return float(np.polyfit(np.log(freqs), np.log(psd), 1)[0])
+
+
+def _spectral_moment(x: np.ndarray, *, moment: str) -> float:
+    freqs, psd = _welch_psd(x)
+    if freqs.size == 0:
+        return math.nan
+    weight = psd / max(float(np.sum(psd)), 1e-15)
+    centroid = float(np.sum(freqs * weight))
+    if moment == "centroid":
+        return centroid
+    return float(np.sqrt(np.sum(((freqs - centroid) ** 2) * weight)))
+
+
+def _spectral_rolloff(x: np.ndarray, q: float = 0.85) -> float:
+    freqs, psd = _welch_psd(x)
+    if freqs.size == 0:
+        return math.nan
+    cumulative = np.cumsum(psd)
+    idx = int(np.searchsorted(cumulative, q * cumulative[-1], side="left"))
+    return float(freqs[min(idx, freqs.size - 1)])
+
+
+def _zero_crossing_rate(x: np.ndarray) -> float:
+    x = _zscore(x)
+    if x.size < 2:
+        return math.nan
+    return float(np.mean(np.diff(np.signbit(x)) != 0))
+
+
+def _turning_point_rate(x: np.ndarray) -> float:
+    x = _finite_fill(x)
+    if x.size < 3:
+        return math.nan
+    d1 = np.diff(x)
+    return float(np.mean(d1[:-1] * d1[1:] < 0.0))
+
+
+def _outlier_rate(x: np.ndarray, threshold: float) -> float:
+    x = _zscore(x)
+    if x.size == 0:
+        return math.nan
+    return float(np.mean(np.abs(x) > threshold))
+
+
+def _spike_rate(x: np.ndarray) -> float:
+    x = _finite_fill(x)
+    if x.size < 3:
+        return math.nan
+    dx = np.diff(x)
+    med = float(np.median(dx))
+    mad = float(np.median(np.abs(dx - med)))
+    if mad < 1e-12:
+        return 0.0
+    return float(np.mean(np.abs(dx - med) > 6.0 * 1.4826 * mad))
+
+
+def _arch_lm_stat(x: np.ndarray, lags: int = 5) -> float:
+    x = _zscore(x)
+    e2 = x**2
+    if e2.size <= lags + 20:
+        return math.nan
+    rows = e2.size - lags
+    y = e2[lags:]
+    X = np.column_stack([e2[lags - j - 1 : e2.size - j - 1] for j in range(lags)])
+    X = np.column_stack([np.ones(rows), X])
+    coef, *_ = np.linalg.lstsq(X, y, rcond=None)
+    pred = X @ coef
+    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
+    if ss_tot <= 1e-12:
+        return 0.0
+    r2 = 1.0 - float(np.sum((y - pred) ** 2)) / ss_tot
+    return float(max(0.0, rows * r2))
+
+
+def _volatility_ac1(x: np.ndarray) -> float:
+    x = _zscore(x)
+    if x.size < 4:
+        return math.nan
+    v = np.abs(np.diff(x))
+    if np.std(v) < 1e-12:
+        return 0.0
+    return float(np.corrcoef(v[:-1], v[1:])[0, 1])
+
+
+def _trend_strength(x: np.ndarray) -> float:
+    x = _finite_fill(x)
+    n = x.size
+    if n < 16:
+        return math.nan
+    t = np.linspace(-1.0, 1.0, n)
+    X = np.column_stack([np.ones(n), t])
+    coef, *_ = np.linalg.lstsq(X, x, rcond=None)
+    pred = X @ coef
+    denom = float(np.var(x))
+    if denom <= 1e-12:
+        return 0.0
+    return float(np.clip(1.0 - np.var(x - pred) / denom, 0.0, 1.0))
+
+
+def _seasonality_strength(x: np.ndarray) -> float:
+    x = _zscore(x)
+    n = x.size
+    if n < 64:
+        return math.nan
+    corr = np.correlate(x, x, mode="full")[n - 1 :]
+    corr = corr / max(abs(corr[0]), 1e-12)
+    lo = 2
+    hi = min(200, n // 3)
+    if hi <= lo:
+        return math.nan
+    return float(np.clip(np.max(np.abs(corr[lo:hi])), 0.0, 1.0))
+
+
+def _changepoint_count(x: np.ndarray) -> int:
+    x = _finite_fill(x)
+    n = x.size
+    if n < 80:
+        return 0
+    window = max(20, n // 40)
+    kernel = np.ones(window) / window
+    smooth = np.convolve(x, kernel, mode="same")
+    diff = np.abs(smooth[window:] - smooth[:-window])
+    if diff.size == 0:
+        return 0
+    threshold = np.median(diff) + 4.0 * np.median(np.abs(diff - np.median(diff)))
+    peaks, _ = signal.find_peaks(diff, height=max(threshold, 1e-12), distance=window)
+    return int(peaks.size)
+
+
+def _recurrence_features(x: np.ndarray) -> dict[str, float]:
+    x = _zscore(x)
+    if x.size > 350:
+        idx = np.linspace(0, x.size - 1, 350, dtype=int)
+        x = x[idx]
+    if x.size < 30:
+        return {"recurrence_rate": math.nan, "determinism": math.nan}
+    emb_dim = 2
+    delay = 1
+    m = x.size - (emb_dim - 1) * delay
+    emb = np.column_stack([x[i * delay : i * delay + m] for i in range(emb_dim)])
+    dist = np.linalg.norm(emb[:, None, :] - emb[None, :, :], axis=2)
+    eps = float(np.percentile(dist[np.triu_indices_from(dist, k=1)], 10))
+    rec = (dist <= eps).astype(bool)
+    np.fill_diagonal(rec, False)
+    recurrence_rate = float(np.mean(rec))
+    diag_points = 0
+    rec_points = int(np.sum(rec))
+    for offset in range(-rec.shape[0] + 1, rec.shape[0]):
+        diag = np.diagonal(rec, offset=offset)
+        if diag.size < 2:
+            continue
+        run = 0
+        for val in diag:
+            if val:
+                run += 1
+            else:
+                if run >= 2:
+                    diag_points += run
+                run = 0
+        if run >= 2:
+            diag_points += run
+    determinism = float(diag_points / rec_points) if rec_points else 0.0
+    return {"recurrence_rate": recurrence_rate, "determinism": determinism}
+
+
+def _false_nearest_fraction(x: np.ndarray) -> float:
+    x = _zscore(x)
+    if x.size > 700:
+        idx = np.linspace(0, x.size - 1, 700, dtype=int)
+        x = x[idx]
+    delay = 1
+    m2 = x.size - 2 * delay
+    if m2 < 50:
+        return math.nan
+    emb2 = np.column_stack([x[:m2], x[delay : delay + m2]])
+    emb3 = np.column_stack([emb2, x[2 * delay : 2 * delay + m2]])
+    nn = NearestNeighbors(n_neighbors=2).fit(emb2)
+    dist, ind = nn.kneighbors(emb2)
+    base = np.maximum(dist[:, 1], 1e-12)
+    lifted = np.linalg.norm(emb3 - emb3[ind[:, 1]], axis=1)
+    return float(np.mean((lifted / base) > 10.0))
+
+
+def _corr_dim_approx(x: np.ndarray) -> float:
+    x = _zscore(x)
+    if x.size > 500:
+        idx = np.linspace(0, x.size - 1, 500, dtype=int)
+        x = x[idx]
+    delay = 1
+    m = x.size - 2 * delay
+    if m < 60:
+        return math.nan
+    emb = np.column_stack([x[:m], x[delay : delay + m], x[2 * delay : 2 * delay + m]])
+    dist = np.linalg.norm(emb[:, None, :] - emb[None, :, :], axis=2)
+    d = dist[np.triu_indices_from(dist, k=1)]
+    d = d[np.isfinite(d) & (d > 1e-12)]
+    if d.size < 100:
+        return math.nan
+    radii = np.percentile(d, [5, 10, 20, 35])
+    counts = np.array([np.mean(d < r) for r in radii], dtype=float)
+    mask = (radii > 0) & (counts > 0)
+    if np.sum(mask) < 3:
+        return math.nan
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return float(np.polyfit(np.log(radii[mask]), np.log(counts[mask]), 1)[0])
+
+
+def _bds_like(x: np.ndarray) -> float:
+    x = _zscore(x)
+    if x.size > 500:
+        idx = np.linspace(0, x.size - 1, 500, dtype=int)
+        x = x[idx]
+    n = x.size
+    if n < 60:
+        return math.nan
+    eps = 0.7 * float(np.std(x))
+    d1 = np.abs(x[:, None] - x[None, :])
+    c1 = float(np.mean(d1[np.triu_indices(n, k=1)] < eps))
+    emb = np.column_stack([x[:-1], x[1:]])
+    d2 = np.max(np.abs(emb[:, None, :] - emb[None, :, :]), axis=2)
+    c2 = float(np.mean(d2[np.triu_indices(emb.shape[0], k=1)] < eps))
+    return float(c2 - c1**2)
+
+
+def _zero_fraction(x: np.ndarray) -> float:
+    x = _finite_fill(x)
+    if x.size == 0:
+        return math.nan
+    scale = max(float(np.std(x)), 1.0)
+    return float(np.mean(np.abs(x) <= 1e-8 * scale))
+
+
+def _cv2_positive(x: np.ndarray) -> float:
+    x = _finite_fill(x)
+    positives = x[x > 0]
+    if positives.size < 3:
+        return math.nan
+    mu = float(np.mean(positives))
+    if abs(mu) < 1e-12:
+        return math.nan
+    return float((np.std(positives) / mu) ** 2)

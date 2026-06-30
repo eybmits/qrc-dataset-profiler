@@ -1,0 +1,19 @@
+{
+  "analysis_version": "frontier-atlas-v1",
+  "artifact": "atlas_support_scores",
+  "discovery_table_path": "results_frontier_v4_discovery/frontier_discovery_evaluated_30_features.csv",
+  "target_table_path": "results_frontier_v4_validation/frontier_validation_evaluated_30_features.csv",
+  "n_discovery": 10000,
+  "n_target": 10000,
+  "k_values": [
+    15,
+    30,
+    50
+  ],
+  "n_ood": 477,
+  "claim_boundary": "Support scores are discovery-fitted validity guardrails, not proof that a prediction is correct.",
+  "outputs": [
+    "frontier_support_scores.csv",
+    "frontier_support_manifest.json"
+  ]
+}

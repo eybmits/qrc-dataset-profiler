@@ -16,7 +16,7 @@ from sklearn.base import clone
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.inspection import permutation_importance
 from sklearn.linear_model import LogisticRegression, Ridge
-from sklearn.metrics import mean_absolute_error, r2_score, roc_auc_score
+from sklearn.metrics import average_precision_score, brier_score_loss, mean_absolute_error, r2_score, roc_auc_score
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 
@@ -77,6 +77,7 @@ def fit_meta_model(
     target: str = "qrc_advantage",
     win_threshold: float = 0.05,
     seed: int = 0,
+    feature_fields: tuple[str, ...] | list[str] | None = None,
 ) -> MetaModelResult:
     """Fit interpretable models that explain QRC advantage from dataset properties.
 
@@ -114,7 +115,8 @@ def fit_meta_model(
     if n_target < 20:
         notes.append("insufficient samples: n<20")
 
-    candidate_features = [c for c in CORE_AXIS_FIELDS if c in catalog_df.columns]
+    requested_features = tuple(feature_fields) if feature_fields is not None else CORE_AXIS_FIELDS
+    candidate_features = [c for c in requested_features if c in catalog_df.columns]
     X_df = catalog_df.loc[valid_y, candidate_features].apply(pd.to_numeric, errors="coerce")
     X_df = X_df.replace([np.inf, -np.inf], np.nan)
     y = y_all.loc[valid_y].to_numpy(dtype=float)
@@ -358,21 +360,25 @@ def _evaluate_classification_cv(
     if len(classes) < 2:
         result["note"] = "only one class for QRC-win target"
         for name in models:
-            result["models"][name] = {"roc_auc": [], "roc_auc_mean": np.nan}
+            result["models"][name] = {"roc_auc": [], "average_precision": [], "brier": [], "roc_auc_mean": np.nan, "average_precision_mean": np.nan, "brier_mean": np.nan}
         return result
     k = min(5, int(counts.min()))
     if k < 2 or X.shape[1] == 0:
         result["note"] = "insufficient class counts for classification CV"
         for name in models:
-            result["models"][name] = {"roc_auc": [], "roc_auc_mean": np.nan}
+            result["models"][name] = {"roc_auc": [], "average_precision": [], "brier": [], "roc_auc_mean": np.nan, "average_precision_mean": np.nan, "brier_mean": np.nan}
         return result
 
     splitter = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)
     for name, model in models.items():
         auc_vals: list[float] = []
+        ap_vals: list[float] = []
+        brier_vals: list[float] = []
         for train_idx, test_idx in splitter.split(X, y_bin):
             if len(np.unique(y_bin[train_idx])) < 2 or len(np.unique(y_bin[test_idx])) < 2:
                 auc_vals.append(np.nan)
+                ap_vals.append(np.nan)
+                brier_vals.append(np.nan)
                 continue
             try:
                 fitted = clone(model).fit(X[train_idx], y_bin[train_idx])
@@ -380,11 +386,26 @@ def _evaluate_classification_cv(
                     score = fitted.predict_proba(X[test_idx])[:, 1]
                 else:
                     score = fitted.decision_function(X[test_idx])
+                prob = np.clip(np.asarray(score, dtype=float), 0.0, 1.0)
                 auc_vals.append(float(roc_auc_score(y_bin[test_idx], score)))
+                ap_vals.append(float(average_precision_score(y_bin[test_idx], score)))
+                brier_vals.append(float(brier_score_loss(y_bin[test_idx], prob)))
             except Exception:
                 auc_vals.append(np.nan)
-        result["models"][name] = {"roc_auc": auc_vals, "roc_auc_mean": _finite_mean(auc_vals), "n_splits": k}
+                ap_vals.append(np.nan)
+                brier_vals.append(np.nan)
+        result["models"][name] = {
+            "roc_auc": auc_vals,
+            "average_precision": ap_vals,
+            "brier": brier_vals,
+            "roc_auc_mean": _finite_mean(auc_vals),
+            "average_precision_mean": _finite_mean(ap_vals),
+            "brier_mean": _finite_mean(brier_vals),
+            "n_splits": k,
+        }
     result["roc_auc_mean"] = result["models"]["gradient_boosting"]["roc_auc_mean"]
+    result["average_precision_mean"] = result["models"]["gradient_boosting"]["average_precision_mean"]
+    result["brier_mean"] = result["models"]["gradient_boosting"]["brier_mean"]
     result["n_splits"] = k
     return result
 

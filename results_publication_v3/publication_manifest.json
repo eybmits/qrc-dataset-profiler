@@ -1,0 +1,20 @@
+{
+  "analysis_version": "publication-package-v1",
+  "inputs": {
+    "atlas_dir": "results_atlas_v3",
+    "analysis_dir": "results_analysis_v3",
+    "attribution_dir": "results_quantum_attribution_v3"
+  },
+  "n_rows": 1000,
+  "n_families": 9,
+  "outputs": [
+    "ATLAS_REPORT.md",
+    "fig1_qrc_usefulness_atlas.pdf",
+    "fig1_qrc_usefulness_atlas.png",
+    "fig2_evidence_controls.pdf",
+    "fig2_evidence_controls.png",
+    "publication_manifest.json"
+  ],
+  "claim_boundary": "Publication figures support a dataset-categorization and meta-model claim. They do not claim broad average QRC superiority or fundamental quantum advantage.",
+  "report_headline": "The 1000-row atlas identifies 51 QRC-useful datasets, with chaotic_flow as the clearest useful family."
+}

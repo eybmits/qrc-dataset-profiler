@@ -1,0 +1,119 @@
+{
+  "analysis_version": "v5-publication-analysis-v1",
+  "inputs": {
+    "discovery_table": "results_frontier_v5_discovery/frontier_discovery_evaluated_v5_multi_qrc.csv",
+    "validation_table": "results_frontier_v5_validation/frontier_validation_evaluated_v5_multi_qrc.csv"
+  },
+  "outputs": {
+    "tables_dir": "results_v5_publication/tables",
+    "figures_dir": "results_v5_publication/figures",
+    "html": "results_v5_publication/index.html",
+    "markdown_report": "results_v5_publication/V5_PUBLICATION_REPORT.md"
+  },
+  "n_discovery": 10000,
+  "n_validation": 10000,
+  "n_features_declared": 30,
+  "n_features_available": 30,
+  "features_available": [
+    "ac_timescale",
+    "ami_first_min",
+    "mem_capacity",
+    "r2_linear",
+    "nl_gain",
+    "snr_db",
+    "lyapunov",
+    "zero_one_K",
+    "spectral_entropy",
+    "dom_freq",
+    "spectral_flatness",
+    "adf_p",
+    "kpss_p",
+    "n_diffs",
+    "dfa_alpha",
+    "perm_entropy",
+    "sample_entropy",
+    "hurst_rs",
+    "forecastability",
+    "pred_nrmse_gbm",
+    "predictability_gap_linear_gbm",
+    "ext_volatility_ac1",
+    "ext_arch_lm5",
+    "ext_recurrence_rate",
+    "ext_recurrence_determinism",
+    "ext_psd_slope",
+    "ext_spectral_centroid",
+    "ext_trend_strength",
+    "ext_changepoint_count",
+    "ext_lz_complexity"
+  ],
+  "win_threshold": 0.05,
+  "family_bootstraps": 1000,
+  "importance_bootstraps": 80,
+  "prospective_validation_metrics": {
+    "n": 10000.0,
+    "regression_r2": 0.4071902869423507,
+    "regression_mae": 0.10058511882744811,
+    "classification_roc_auc": 0.8356603577502937,
+    "classification_pr_auc": 0.4305048317305506,
+    "classification_brier": 0.08797285075571055
+  },
+  "top_features": [
+    "pred_nrmse_gbm",
+    "dfa_alpha",
+    "predictability_gap_linear_gbm",
+    "ext_spectral_centroid",
+    "ext_volatility_ac1",
+    "ext_trend_strength",
+    "nl_gain",
+    "lyapunov",
+    "ext_psd_slope",
+    "ac_timescale",
+    "kpss_p",
+    "snr_db"
+  ],
+  "figures": [
+    {
+      "title": "V5 01 Outcome Overview",
+      "caption": "Variant outcomes, advantage distribution, baseline NRMSE, and best-QRC composition.",
+      "png": "v5_01_outcome_overview.png",
+      "pdf": "v5_01_outcome_overview.pdf"
+    },
+    {
+      "title": "V5 02 Regime Map",
+      "caption": "Validation regime map with all rows, family rates, and best-variant composition.",
+      "png": "v5_02_regime_map.png",
+      "pdf": "v5_02_regime_map.pdf"
+    },
+    {
+      "title": "V5 03 Family Effects",
+      "caption": "Validation family useful rates and mean-advantage confidence intervals.",
+      "png": "v5_03_family_effects.png",
+      "pdf": "v5_03_family_effects.pdf"
+    },
+    {
+      "title": "V5 04 Feature Regressions",
+      "caption": "All validation datapoints plotted against top features with regression lines and confidence bands.",
+      "png": "v5_04_feature_regressions.png",
+      "pdf": "v5_04_feature_regressions.pdf"
+    },
+    {
+      "title": "V5 05 Meta Model Validation",
+      "caption": "Discovery-trained meta-model prediction, calibration, residuals, and feature importances.",
+      "png": "v5_05_meta_model_validation.png",
+      "pdf": "v5_05_meta_model_validation.pdf"
+    },
+    {
+      "title": "V5 06 Robustness",
+      "caption": "Feature-set robustness, threshold robustness, and split stability.",
+      "png": "v5_06_robustness.png",
+      "pdf": "v5_06_robustness.pdf"
+    },
+    {
+      "title": "V5 07 Family Feature Matrix",
+      "caption": "Family-level feature heatmap with useful rates and effect intervals.",
+      "png": "v5_07_family_feature_matrix.png",
+      "pdf": "v5_07_family_feature_matrix.pdf"
+    }
+  ],
+  "claim_boundary": "The v5 publication package supports a protocol-local regime-atlas claim for globally frozen canonical QRC variants against a globally frozen feature-matched ESN. It does not establish broad average QRC superiority, quantum advantage, or an entanglement/coupling mechanism."
+}

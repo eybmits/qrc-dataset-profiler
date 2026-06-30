@@ -4,4 +4,21 @@ __pycache__/
 build/
 dist/
 results/
+logs/
 .venv/
+.DS_Store
+.pytest_cache/
+
+# LaTeX build products
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+paper/main.pdf
+
+# Local paper-writing scratch context
+paper/context/

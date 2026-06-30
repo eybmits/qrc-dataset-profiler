@@ -1,0 +1,119 @@
+{
+  "analysis_version": "increment4-v1",
+  "seed": 0,
+  "family_bootstraps": 1000,
+  "importance_bootstraps": 30,
+  "win_threshold": 0.05,
+  "n_rows": 1000,
+  "families": [
+    "chaotic_flow",
+    "chaotic_map",
+    "colored_noise",
+    "input_driven",
+    "linear_stochastic",
+    "long_range",
+    "nonlinear_stochastic",
+    "nonstationary",
+    "oscillatory",
+    "real_bridge"
+  ],
+  "feature_sets": [
+    {
+      "name": "all",
+      "description": "All schema-v1 core axis fields.",
+      "features": [
+        "ac_timescale",
+        "ami_first_min",
+        "mem_capacity",
+        "r2_linear",
+        "nl_gain",
+        "snr_db",
+        "lyapunov",
+        "zero_one_K",
+        "spectral_entropy",
+        "dom_freq",
+        "spectral_flatness",
+        "adf_p",
+        "kpss_p",
+        "n_diffs",
+        "dfa_alpha",
+        "perm_entropy",
+        "forecastability",
+        "pred_nrmse_gbm"
+      ]
+    },
+    {
+      "name": "without_r2_linear",
+      "description": "All core axis fields except the direct linear predictability score.",
+      "features": [
+        "ac_timescale",
+        "ami_first_min",
+        "mem_capacity",
+        "nl_gain",
+        "snr_db",
+        "lyapunov",
+        "zero_one_K",
+        "spectral_entropy",
+        "dom_freq",
+        "spectral_flatness",
+        "adf_p",
+        "kpss_p",
+        "n_diffs",
+        "dfa_alpha",
+        "perm_entropy",
+        "forecastability",
+        "pred_nrmse_gbm"
+      ]
+    },
+    {
+      "name": "without_predictability_proxies",
+      "description": "Core axis fields excluding r2_linear, forecastability, and pred_nrmse_gbm.",
+      "features": [
+        "ac_timescale",
+        "ami_first_min",
+        "mem_capacity",
+        "nl_gain",
+        "snr_db",
+        "lyapunov",
+        "zero_one_K",
+        "spectral_entropy",
+        "dom_freq",
+        "spectral_flatness",
+        "adf_p",
+        "kpss_p",
+        "n_diffs",
+        "dfa_alpha",
+        "perm_entropy"
+      ]
+    },
+    {
+      "name": "chaos_nonlinearity_complexity_only",
+      "description": "Restricted to chaos, nonlinearity, spectral complexity, and entropy features.",
+      "features": [
+        "nl_gain",
+        "lyapunov",
+        "zero_one_K",
+        "spectral_entropy",
+        "spectral_flatness",
+        "dfa_alpha",
+        "perm_entropy"
+      ]
+    }
+  ],
+  "claim_boundary": "This analysis can support property-to-advantage robustness claims. It does not establish coupling, entanglement, or a quantum mechanism.",
+  "outputs": [
+    "analysis_manifest.json",
+    "family_advantage_bootstrap.csv",
+    "family_advantage_bootstrap.png",
+    "importance_bootstrap.csv",
+    "importance_bootstrap.png",
+    "importances_all.csv",
+    "importances_chaos_nonlinearity_complexity_only.csv",
+    "importances_without_predictability_proxies.csv",
+    "importances_without_r2_linear.csv",
+    "robustness_summary.csv",
+    "robustness_summary.png",
+    "sweep_summary.csv",
+    "sweep_summary.png"
+  ]
+}

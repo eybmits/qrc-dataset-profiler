@@ -1,0 +1,72 @@
+{
+  "analysis_version": "qrc-power-audit-v1",
+  "scope": "held-out calibration set, seed 0 only, diagnostic not headline evidence",
+  "n_calibration_datasets": 26,
+  "seed_values": [
+    0
+  ],
+  "frozen_esn_grid": {
+    "rho": [
+      0.7
+    ],
+    "leak": [
+      0.6
+    ],
+    "input_scale": [
+      0.3
+    ]
+  },
+  "variants": [
+    "standard_v3_current_6q60",
+    "clean_capacity_8q80",
+    "clean_capacity_10q100",
+    "clean_deeper_6q84",
+    "clean_deeper_8q112",
+    "weak_amp_damping_6q60",
+    "weak_dephasing_6q60",
+    "encoding_reupload_6q60",
+    "encoding_reupload_8q80"
+  ],
+  "best_by_mean_qrc_test_nrmse": {
+    "variant": "standard_v3_current_6q60",
+    "n_qubits": 6,
+    "depth": 5,
+    "virtual_nodes": 5,
+    "feature_dim": 60,
+    "reupload": false,
+    "amplitude_damping": 0.0,
+    "dephasing": 0.0,
+    "mean_qrc_val_nrmse": 0.8251114618167826,
+    "mean_qrc_test_nrmse": 0.8721110297151944,
+    "mean_matched_esn_val_nrmse": 0.7500297669745757,
+    "mean_matched_esn_test_nrmse": 0.8081816036884566,
+    "mean_advantage_vs_matched_esn": -0.0639294260267381,
+    "qrc_win_rate_vs_matched_esn": 0.19230769230769232,
+    "mean_qrc_minus_esn_test_nrmse": 0.0639294260267381,
+    "seconds": 4.566561698913574
+  },
+  "best_by_advantage_vs_matched_esn": {
+    "variant": "standard_v3_current_6q60",
+    "n_qubits": 6,
+    "depth": 5,
+    "virtual_nodes": 5,
+    "feature_dim": 60,
+    "reupload": false,
+    "amplitude_damping": 0.0,
+    "dephasing": 0.0,
+    "mean_qrc_val_nrmse": 0.8251114618167826,
+    "mean_qrc_test_nrmse": 0.8721110297151944,
+    "mean_matched_esn_val_nrmse": 0.7500297669745757,
+    "mean_matched_esn_test_nrmse": 0.8081816036884566,
+    "mean_advantage_vs_matched_esn": -0.0639294260267381,
+    "qrc_win_rate_vs_matched_esn": 0.19230769230769232,
+    "mean_qrc_minus_esn_test_nrmse": 0.0639294260267381,
+    "seconds": 4.566561698913574
+  },
+  "elapsed_seconds": 80.3176519870758,
+  "claim_boundary": "Diagnostic capacity/encoding audit only; does not replace frozen standard_v3 atlas labels.",
+  "outputs": [
+    "calibration_power_audit.csv",
+    "qrc_power_audit_manifest.json"
+  ]
+}

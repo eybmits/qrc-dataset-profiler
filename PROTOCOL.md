@@ -1,4 +1,4 @@
-# QRC Dataset Profiler — Protocol v1 (FROZEN)
+# QRC Dataset Profiler — Schema Protocol v2 (FROZEN)
 
 Goal: a **unified, scientifically justified protocol** that characterizes *any* univariate
 real-valued time series with the **same fields**, so arbitrarily many datasets (synthetic
@@ -6,8 +6,15 @@ real-valued time series with the **same fields**, so arbitrarily many datasets (
 quantum reservoir against classical baselines on each dataset and learn which dataset
 properties explain when Spin-QRC wins.
 
-This file is the **contract**. `src/qrc_dataset_profiler/spec.py` is its machine-readable form.
-Do **not** silently change field names or semantics — add fields and bump `SCHEMA_VERSION`.
+This file is the **schema and dataset contract**. `src/qrc_dataset_profiler/spec.py` is its
+machine-readable form. Do **not** silently change field names or semantics — add fields and
+bump `SCHEMA_VERSION`.
+
+The publication-facing QRC-vs-classical comparison is now frozen separately in
+`COMPARISON_PROTOCOL.md` as **Frozen Comparison Protocol v3**. Current legacy/v2 artifacts
+were generated before that symmetric v3 freeze; rerun the atlas with
+`--comparison-protocol standard_v3` and a held-out calibration config before making
+standard-comparison paper claims.
 
 ---
 
@@ -27,7 +34,7 @@ the **Tier-B backstop** (`catch22` + `tsfeatures`), computed wholesale as a comp
 - NaN policy: ground-truth block = `NaN` for real data; `mem_capacity` = `NaN` unless input-driven.
 - Determinism: every generator + estimator is seeded.
 
-## 3. The 20 datasets (first catalog)
+## 3. The 50 datasets (first catalog)
 Synthetic unless marked. Each synthetic generator must expose ground truth where known.
 
 | # | name | family | task_type | key params | ground truth |
@@ -51,12 +58,46 @@ Synthetic unless marked. Each synthetic generator must expose ground truth where
 | 17 | chirp | nonstationary | forecast | f0,f1 | — |
 | 18 | regime_switch_ar | nonstationary | forecast | markov | — |
 | 19 | lorenz63_noisy | chaotic_flow | forecast | rho=28, snr=10dB | is_chaotic (noise overlay demo) |
-| 20 | santa_fe_laser | real_bridge | forecast | dataset A | — (real; loader, may be optional/offline-stub) |
+| 20 | henon_heiles | chaotic_flow | forecast | energy≈0.145 | is_chaotic regime flag |
+| 21 | narma2 | input_driven | input_driven | order=2 | true_memory_order=2 |
+| 22 | narma5 | input_driven | input_driven | order=5 | true_memory_order=5 |
+| 23 | narma30 | input_driven | input_driven | order=30 | true_memory_order=30 |
+| 24 | channel_equalization | input_driven | input_driven | nonlinear channel | true_memory_order≈2 |
+| 25 | ikeda_map | chaotic_map | forecast | u=0.9 | is_chaotic |
+| 26 | tent_map | chaotic_map | forecast | mu≈2 | true_lyapunov, is_chaotic |
+| 27 | sine_map | chaotic_map | forecast | a≈1 | is_chaotic |
+| 28 | circle_map | chaotic_map | forecast | omega,K | is_chaotic regime flag |
+| 29 | lozi_map | chaotic_map | forecast | a,b | is_chaotic |
+| 30 | standard_map | chaotic_map | forecast | K | is_chaotic regime flag |
+| 31 | quadratic_map | chaotic_map | forecast | a | is_chaotic regime flag |
+| 32 | duffing | chaotic_flow | forecast | forced Duffing | is_chaotic regime flag |
+| 33 | van_der_pol | oscillatory | forecast | mu | true_n_frequencies≈1 |
+| 34 | lorenz96 | chaotic_flow | forecast | F,K | is_chaotic regime flag |
+| 35 | chua_circuit | chaotic_flow | forecast | double-scroll circuit | is_chaotic |
+| 36 | arma22 | linear_stochastic | forecast | ARMA(2,2) | true_memory_order=2 |
+| 37 | arima_random_walk | nonstationary | forecast | unit-root drift | is_chaotic=0 |
+| 38 | seasonal_ar | linear_stochastic | forecast | seasonal lag | true_memory_order=season |
+| 39 | setar | nonlinear_stochastic | forecast | threshold AR | is_chaotic=0 |
+| 40 | egarch | nonlinear_stochastic | forecast | EGARCH volatility | is_chaotic=0 |
+| 41 | stochastic_volatility | nonlinear_stochastic | forecast | latent volatility | is_chaotic=0 |
+| 42 | bilinear | nonlinear_stochastic | forecast | bilinear AR | is_chaotic=0 |
+| 43 | arch | nonlinear_stochastic | forecast | ARCH(1) | is_chaotic=0 |
+| 44 | brown_noise | colored_noise | forecast | beta=2 | is_chaotic=0 |
+| 45 | blue_noise | colored_noise | forecast | beta=-1 | is_chaotic=0 |
+| 46 | amplitude_modulated | oscillatory | forecast | carrier/modulation | true_n_frequencies≈2 |
+| 47 | damped_oscillator | oscillatory | forecast | damping,freq | true_n_frequencies≈1 |
+| 48 | level_shift | nonstationary | forecast | piecewise level | is_chaotic=0 |
+| 49 | intermittent_demand | nonstationary | forecast | sparse bursts | is_chaotic=0 |
+| 50 | trend_seasonal | nonstationary | forecast | trend + seasonality | true_n_frequencies≈2 |
 
 Decorators (apply on any base, used for #19 and future rows): observation/dynamic noise at
 target SNR; nonstationarity (drift/regime/chirp-warp); downsample/embed.
 
-## 4. schema v1 — the core property catalog (per record)
+External validation bridge: Santa Fe laser remains available via `make_real_bridge_specs`
+and local `data/SantaFeA.dat` + `data/SantaFeA2.dat` or `data/santa_fe_laser.*`, but it is
+not part of the 50 synthetic primary catalog or the default 1000-row synthetic sweep.
+
+## 4. schema v2 — the core property catalog (per record)
 All groups → columns of one row. See `spec.py` for exact names/defaults.
 
 - **A Identity**: dataset_id, name, family, source, task_type, params, seed, schema_version, n_channels, length, horizon, missing_frac, irregular_sampling
@@ -69,16 +110,47 @@ All groups → columns of one row. See `spec.py` for exact names/defaults.
   5. Chaos: `lyapunov` (Rosenstein, +`lyapunov_valid`), `zero_one_K` (Gottwald–Melbourne, +`zero_one_valid`)
   6. Frequency: `spectral_entropy`, `dom_freq`, `spectral_flatness`
   7. Stationarity (on raw): `adf_p`, `kpss_p`, `n_diffs`
-  8. Long-range: `dfa_alpha` (+`dfa_valid`)
-  9. Complexity: `perm_entropy`
+  8. Long-range: `dfa_alpha` (+`dfa_valid`), `hurst_rs`
+  9. Complexity: `perm_entropy`, `sample_entropy`
   10. Predictability: `forecastability` (=1−normalized spectral entropy), `pred_nrmse_gbm`
 - **D Ground truth** (synthetic): `true_lyapunov`, `true_memory_order`, `true_n_frequencies`, `true_hurst`, `is_chaotic`
 - **E Targets** (filled in Increment 2): `nrmse_linear`, `nrmse_esn_matched`, `nrmse_qrc_spin`, `nrmse_gbm`, `qrc_advantage`
 
-**Tier-B backstop** (separate table, not in the core record): `catch22` (22 feats) + `tsfeatures`,
-computed wholesale; used only as a canonical-correlation completeness check vs the 10 axes.
+## 4.1 Frontier Feature Tiers
 
-## 5. Standard-Spin v1 — the fixed quantum reservoir (Increment 2)
+The 1000-row v3 atlas uses the 20 schema-v2 core fields as the primary explanatory
+feature set. The planned frontier atlas upgrades the headline feature set to **30 Tier-A
+features**: the 20 core fields plus 10 predeclared additions that are universal,
+interpretable, and directly relevant to reservoir usefulness. These are frozen before the
+frontier run and must not be selected after seeing frontier QRC outcomes.
+
+**Tier-A core fields (20):** `ac_timescale`, `ami_first_min`, `mem_capacity`, `r2_linear`,
+`nl_gain`, `snr_db`, `lyapunov`, `zero_one_K`, `spectral_entropy`, `dom_freq`,
+`spectral_flatness`, `adf_p`, `kpss_p`, `n_diffs`, `dfa_alpha`, `perm_entropy`,
+`sample_entropy`, `hurst_rs`, `forecastability`, `pred_nrmse_gbm`.
+
+**Tier-A frontier additions (10):**
+
+- `predictability_gap_linear_gbm`: nonlinear predictability gap between linear and GBM
+  baselines.
+- `ext_volatility_ac1`: lag-1 autocorrelation of local volatility.
+- `ext_arch_lm5`: ARCH-like volatility clustering statistic.
+- `ext_recurrence_rate`: recurrence density in an embedded phase portrait.
+- `ext_recurrence_determinism`: diagonal-line determinism of recurrences.
+- `ext_psd_slope`: power-spectrum slope.
+- `ext_spectral_centroid`: spectral center of mass.
+- `ext_trend_strength`: deterministic trend strength.
+- `ext_changepoint_count`: simple regime-change count.
+- `ext_lz_complexity`: symbolic Lempel-Ziv complexity.
+
+**Tier-B extended descriptors:** `ext_approx_entropy_m2`, `ext_spectral_bandwidth`,
+`ext_spectral_rolloff85`, `ext_zero_crossing_rate`, `ext_turning_point_rate`,
+`ext_outlier_rate_3sigma`, `ext_spike_rate_mad6`, `ext_seasonality_strength`,
+`ext_fnn_fraction`, `ext_corr_dim_approx`, `ext_bds_like`, `ext_zero_fraction`,
+`ext_cv2_positive`. Tier-B remains robustness/discovery material only and is not the
+headline explanatory feature set.
+
+## 5. Standard-Spin v1 — legacy fixed quantum reservoir (Increment 2)
 Persistent, input-driven **transverse-field Ising** reservoir (genuine statevector, NOT the
 mean-field surrogate). H = J·Σ_⟨i,j⟩ Z_i Z_j + h·Σ_i X_i, ring topology.
 
@@ -94,8 +166,16 @@ mean-field surrogate). H = J·Σ_⟨i,j⟩ Z_i Z_j + h·Σ_i X_i, ring topology.
 Baselines per dataset: linear/Ridge (AR), **dim-matched leaky ESN** (key control), GBM/MLP.
 `qrc_advantage = nrmse_esn_matched − nrmse_qrc_spin`, multi-seed mean + CI.
 
+Legacy note: Increment 2-5 artifacts used the original Standard-Spin v1 path with input
+injection plus per-layer RZ reuploading and a dimension-matched simple-cycle ESN. The
+frozen publication comparison v3 changes the primary comparison to held-out calibrated
+fixed QRC versus held-out calibrated fixed sparse random leaky ESN, both with the same
+ridge readout protocol. See `COMPARISON_PROTOCOL.md`.
+
 ## 6. Increments
-- **Increment 1 (this delegation):** package + 20 generators (Block D ground truth) + schema-v1
+- **Increment 1:** package + initial 20 generators (Block D ground truth) + schema-v1
   estimators (Block A–C) + smoke `run_profile` → `catalog.parquet` + correlation/coverage report
   + **ground-truth validation** of estimators. Reservoir/baselines/meta-model = stubs.
 - **Increment 2:** Standard-Spin v1 reservoir + baselines + targets (Block E) + meta-model (GBM+SHAP).
+- **Increment 5:** expanded to 50 named benchmarks and a 1000-row default sweep; added a
+  separate deterministic Tier-B feature table without changing schema-v1 core fields.

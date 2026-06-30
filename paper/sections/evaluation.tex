@@ -1,0 +1,133 @@
+The evaluation is organized around the five paper claims: selectivity, predictability, slow-stateful regimes, interacting descriptors, and dataset-level triage.
+
+\begin{figure*}[!t]
+    \centering
+    \includegraphics[width=0.88\textwidth]{regime-map.pdf}
+    \caption{Validation regime map. Each point is one synthetic time-series dataset projected from 30 measured descriptors. Color denotes best-QRC advantage over the frozen ESN; outlined points meet the useful threshold. The side panels summarize the families where QRC is most often useful and which QRC variant is selected.}
+    \label{fig:regime-map}
+\end{figure*}
+
+\subsection{QRC is selective, not broadly dominant}
+
+QRC does not win on average. In validation, the mean ESN NRMSE is 0.805 and the mean best-QRC NRMSE is 0.863, giving mean best-QRC advantage \(-0.058\). However, QRC wins are not random leftovers: the best frozen QRC variant beats the ESN in 32.4\% of validation rows and reaches the useful threshold in 12.5\%. Discovery is similar, with 32.6\% win rate and 11.8\% useful rate. This discovery/validation agreement supports the first claim: empirical quantum reservoir advantage is selective but reproducible.
+
+\begin{table}[!t]
+\centering
+\caption{Validation performance by frozen model. Advantage is measured against the frozen ESN.}
+\label{tab:baseline-summary}
+\scriptsize
+\setlength{\tabcolsep}{3.4pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{lrrrr}
+\toprule
+Model & Mean NRMSE & Median & Win & Mean adv. \\
+\midrule
+Linear ridge & 0.802 & 0.945 & 47.5 & +0.003 \\
+GBM & 0.782 & 0.907 & 39.3 & +0.023 \\
+NVAR & 0.844 & 0.962 & 35.3 & -0.039 \\
+Frozen ESN & 0.805 & 0.919 & -- & 0.000 \\
+Best QRC & 0.863 & 0.959 & 32.4 & -0.058 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[!t]
+\centering
+\caption{Validation performance by frozen QRC variant.}
+\label{tab:variant-summary}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.04}
+\begin{tabular}{lrrrr}
+\toprule
+Variant & Mean adv. & Median adv. & Win & Useful \\
+\midrule
+QRC-M dynamics & -0.100 & -0.029 & 22.0 & 9.4 \\
+QRC-E reupload & -0.155 & -0.058 & 16.2 & 6.9 \\
+QRC-D dissipative & -0.239 & -0.090 & 14.0 & 5.5 \\
+Best QRC & -0.058 & -0.011 & 32.4 & 12.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The best-QRC row is not per-dataset tuning. It is the best member of a small, fixed menu of canonical QRC protocols. The interpretation is practical: if a user is willing to test a few defensible QRC mechanisms, the atlas asks where at least one is useful against the same frozen ESN.
+
+\subsection{Dataset properties predict QRC usefulness}
+
+\begin{figure*}[!t]
+    \centering
+    \includegraphics[width=\textwidth]{meta-model-validation.pdf}
+    \caption{Meta-model validation. The model is trained on discovery rows and evaluated once on held-out validation rows. The panels show predicted versus observed advantage, probability calibration, and discovery-trained feature importance.}
+    \label{fig:meta-model}
+\end{figure*}
+
+The discovery-trained meta-model predicts validation advantage with \(R^2=0.407\) and MAE 0.101. For the binary useful label, it obtains ROC-AUC 0.836 and PR-AUC 0.431 against a 12.5\% base rate. This is strong enough for triage: the model ranks held-out datasets by QRC usefulness from measured descriptors, before running QRC on those rows.
+
+The important descriptors are not a single axis. Top features include GBM predictability, scaling exponent, predictability-gap structure, spectral centroid, volatility autocorrelation, trend strength, nonlinear-gain contrast, Lyapunov estimate, spectral slope, autocorrelation time, stationarity signal, and SNR. The signs are mixed because the map is interaction-driven: the same descriptor can be favorable in one region and unfavorable in another.
+
+\subsection{Slow, stateful regimes are most favorable}
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\columnwidth]{family-effects.pdf}
+    \caption{Validation family effects. Drifting-trend, regime-switching, and colored-noise families have the clearest positive mean effects. Several families contain useful pockets despite negative family-average advantage, showing why row-level triage is needed.}
+    \label{fig:family-effects}
+\end{figure}
+
+\autoref{fig:family-effects} and \autoref{tab:family-top} summarize the family-level structure. The strongest family is the drifting-trend family, with 47.9\% useful rate, 51.8\% win rate, and mean advantage \(+0.240\) with 95\% bootstrap interval \([+0.203,+0.282]\). Regime switching and colored noise also have positive mean effects and useful rates above 23\%. Intermittent sparse and linear stochastic families have high win rates but small mean effects, indicating many near-ties rather than large QRC gains.
+
+\begin{table}[!t]
+\centering
+\caption{Top validation families by useful QRC rate.}
+\label{tab:family-top}
+\scriptsize
+\setlength{\tabcolsep}{2.6pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{lrrrr}
+\toprule
+Family & \(n\) & Useful & Win & Mean adv. \\
+\midrule
+Drifting trend & 353 & 47.9 & 51.8 & +0.240 \\
+Regime switching & 313 & 28.8 & 48.2 & +0.054 \\
+Colored noise & 315 & 23.5 & 48.6 & +0.057 \\
+Chaotic flow & 1137 & 23.1 & 29.6 & -0.125 \\
+Seasonal/calendar & 255 & 16.9 & 25.9 & -0.193 \\
+Delay dynamics & 231 & 12.1 & 15.6 & -0.264 \\
+Intermittent sparse & 142 & 11.3 & 53.5 & +0.024 \\
+Chaotic map & 2056 & 10.6 & 28.5 & -0.072 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The strongest extracted validation rule pocket is also interpretable. Rows with high trend strength and low spectral centroid form a pocket of 420 validation datasets with 47.4\% useful rate and mean advantage \(+0.209\). This is not a mechanism proof. It is a compact triage rule: slow, trend-heavy, low-frequency structure is a high-priority region for testing QRC.
+
+\subsection{The map is robust to feature choices}
+
+The feature-set robustness table supports the anti-circularity claim. The full 30-feature map reaches validation ROC-AUC 0.836 and PR-AUC 0.431. Using only the original 20 core descriptors gives ROC-AUC 0.828 and PR-AUC 0.423. Removing direct predictability proxies gives ROC-AUC 0.834 and PR-AUC 0.432. Restricting to persistence, spectrum, volatility, and nonstationarity gives ROC-AUC 0.827 and PR-AUC 0.409. Thus the atlas is not simply rediscovering which baseline already won.
+
+\begin{table}[!t]
+\centering
+\caption{Validation robustness of meta-model feature sets.}
+\label{tab:feature-robustness}
+\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\renewcommand{\arraystretch}{1.04}
+\begin{tabular}{lrrr}
+\toprule
+Feature set & \(R^2\) & ROC & PR \\
+\midrule
+Full 30 descriptors & .407 & .836 & .431 \\
+Original 20 core & .383 & .828 & .423 \\
+No predictability proxies & .392 & .834 & .432 \\
+No chaos/nonlinear/complexity & .384 & .831 & .430 \\
+Persistence/spectrum/drift & .364 & .827 & .409 \\
+Chaos/nonlinear/complexity only & .324 & .798 & .359 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Threshold robustness leads to the same conclusion. The validation useful rate is 35.4\% at threshold 0, 17.5\% at 0.025, 12.5\% at 0.05, and 8.5\% at 0.1. Stricter thresholds make QRC advantage rarer, but they do not erase the slow-stateful pocket.
+
+\subsection{What the triage map means}
+
+The practical output is a screening rule, not a universal deployment rule. A practitioner can measure the 30 descriptors, locate the dataset in property space, and decide whether QRC evaluation is worth the extra cost. High predicted usefulness does not guarantee a QRC win; it identifies a region where the empirical evidence says QRC deserves testing. Low predicted usefulness is equally useful: it says the ESN is likely to be the better default unless there is a separate hardware, physical, or scientific reason to test a quantum reservoir.

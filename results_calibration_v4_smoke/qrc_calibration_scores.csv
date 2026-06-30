@@ -1,0 +1,2 @@
+J,h,dt,amplitude_damping,dephasing,feature_dim,mean_val_nrmse,median_val_nrmse,mean_test_nrmse,median_test_nrmse
+1.0,1.0,0.2,0.0,0.0,40,0.8675794338901155,0.9374191951920114,0.9013704186849709,0.9300396520853058

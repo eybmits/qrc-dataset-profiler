@@ -1,0 +1,112 @@
+{
+  "analysis_version": "visual-suite-v1",
+  "inputs": {
+    "atlas_dir": "results_atlas",
+    "analysis_dir": "results_analysis",
+    "attribution_dir": "results_quantum_attribution",
+    "features_dir": "results_features",
+    "sweep_catalog": "results_sweep/sweep_catalog.csv",
+    "full_catalog": "results_full/full_catalog.csv"
+  },
+  "n_rows": 1000,
+  "n_families": 10,
+  "n_extended_features": 24,
+  "figures": [
+    {
+      "stem": "00_visual_abstract",
+      "title": "00 Visual Abstract",
+      "caption": "Executive visual summary of the full QRC usefulness atlas.",
+      "png": "00_visual_abstract.png",
+      "pdf": "00_visual_abstract.pdf"
+    },
+    {
+      "stem": "01_property_landscape",
+      "title": "01 Property Landscape",
+      "caption": "Two-panel property map of observed and predicted QRC usefulness.",
+      "png": "01_property_landscape.png",
+      "pdf": "01_property_landscape.pdf"
+    },
+    {
+      "stem": "02_sweep_barcode",
+      "title": "02 Sweep Barcode",
+      "caption": "Full sweep barcode by generator/control group and parameter variant.",
+      "png": "02_sweep_barcode.png",
+      "pdf": "02_sweep_barcode.pdf"
+    },
+    {
+      "stem": "03_family_outcomes",
+      "title": "03 Family Outcomes",
+      "caption": "Family outcome shares and advantage confidence intervals.",
+      "png": "03_family_outcomes.png",
+      "pdf": "03_family_outcomes.pdf"
+    },
+    {
+      "stem": "04_advantage_distributions",
+      "title": "04 Advantage Distributions",
+      "caption": "Within-family QRC advantage distributions with bootstrap mean intervals.",
+      "png": "04_advantage_distributions.png",
+      "pdf": "04_advantage_distributions.pdf"
+    },
+    {
+      "stem": "05_meta_model_evidence",
+      "title": "05 Meta Model Evidence",
+      "caption": "Meta-model prediction, importance, robustness, and residual diagnostics.",
+      "png": "05_meta_model_evidence.png",
+      "pdf": "05_meta_model_evidence.pdf"
+    },
+    {
+      "stem": "06_extended_feature_map",
+      "title": "06 Extended Feature Map",
+      "caption": "Extended feature correlations and family-level feature heatmap.",
+      "png": "06_extended_feature_map.png",
+      "pdf": "06_extended_feature_map.pdf"
+    },
+    {
+      "stem": "07_quantum_attribution_guardrail",
+      "title": "07 Quantum Attribution Guardrail",
+      "caption": "Paired J=1 versus J=0 control intervals and scatter.",
+      "png": "07_quantum_attribution_guardrail.png",
+      "pdf": "07_quantum_attribution_guardrail.pdf"
+    },
+    {
+      "stem": "08_full_catalog_inventory",
+      "title": "08 Full Catalog Inventory",
+      "caption": "Full 50-row benchmark inventory with core properties and QRC advantage.",
+      "png": "08_full_catalog_inventory.png",
+      "pdf": "08_full_catalog_inventory.pdf"
+    },
+    {
+      "stem": "09_all_points_feature_regressions",
+      "title": "09 All Points Feature Regressions",
+      "caption": "All finite sweep rows plotted against top features with regression lines and confidence bands.",
+      "png": "09_all_points_feature_regressions.png",
+      "pdf": "09_all_points_feature_regressions.pdf"
+    }
+  ],
+  "outputs": [
+    "00_visual_abstract.pdf",
+    "00_visual_abstract.png",
+    "01_property_landscape.pdf",
+    "01_property_landscape.png",
+    "02_sweep_barcode.pdf",
+    "02_sweep_barcode.png",
+    "03_family_outcomes.pdf",
+    "03_family_outcomes.png",
+    "04_advantage_distributions.pdf",
+    "04_advantage_distributions.png",
+    "05_meta_model_evidence.pdf",
+    "05_meta_model_evidence.png",
+    "06_extended_feature_map.pdf",
+    "06_extended_feature_map.png",
+    "07_quantum_attribution_guardrail.pdf",
+    "07_quantum_attribution_guardrail.png",
+    "08_full_catalog_inventory.pdf",
+    "08_full_catalog_inventory.png",
+    "09_all_points_feature_regressions.pdf",
+    "09_all_points_feature_regressions.png",
+    "VISUAL_SUITE_REPORT.md",
+    "index.html"
+  ],
+  "html_index": "index.html",
+  "claim_boundary": "The visual suite supports a dataset-categorization and meta-model claim. It does not claim broad average QRC superiority or a quantum coupling mechanism."
+}

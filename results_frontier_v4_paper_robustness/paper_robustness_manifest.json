@@ -1,0 +1,66 @@
+{
+  "analysis_version": "paper-robustness-v1",
+  "discovery_table": "results_frontier_v4_discovery/frontier_discovery_evaluated_30_features.csv",
+  "validation_table": "results_frontier_v4_validation/frontier_validation_evaluated_30_features.csv",
+  "calibration_config": "results_calibration_v4/frozen_config.json",
+  "n_discovery": 10000,
+  "n_validation": 10000,
+  "thresholds": [
+    0.0,
+    0.025,
+    0.05,
+    0.1
+  ],
+  "metric_subset_n_requested": 80,
+  "metric_subset_n_written": 80,
+  "mechanism_rows_requested": 24,
+  "mechanism_rows_written": 24,
+  "real_probes_written": 7,
+  "claim_boundary": "This suite stress-tests a protocol-local regime-map claim. Real probes are interpolation/OOD diagnostics, subset NMAE/NVAR checks are robustness checks, and mechanism guardrails are not evidence for fundamental quantum advantage.",
+  "outputs": [
+    "PAPER_ROBUSTNESS_REPORT.md",
+    "feature_family_ablation.csv",
+    "feature_quantile_enrichment.csv",
+    "mechanism_guardrail_subset.csv",
+    "mechanism_guardrail_summary.csv",
+    "metric_nmae_nvar_subset.csv",
+    "metric_nmae_nvar_summary.csv",
+    "real_world_probe_predictions.csv",
+    "regime_enrichment.csv",
+    "robustness_01_feature_family_ablation.png",
+    "robustness_02_threshold_robustness.png",
+    "robustness_03_regime_enrichment.png",
+    "robustness_04_real_world_probes.png",
+    "robustness_05_metric_nmae_nvar.png",
+    "robustness_06_mechanism_guardrail.png",
+    "threshold_robustness.csv",
+    "paper_robustness_manifest.json"
+  ],
+  "figures": [
+    {
+      "path": "results_frontier_v4_paper_robustness/robustness_01_feature_family_ablation.png",
+      "description": "Feature-family ablation for the QRC-useful classifier."
+    },
+    {
+      "path": "results_frontier_v4_paper_robustness/robustness_02_threshold_robustness.png",
+      "description": "Meta-model classification robustness across useful thresholds."
+    },
+    {
+      "path": "results_frontier_v4_paper_robustness/robustness_03_regime_enrichment.png",
+      "description": "Enrichment of QRC-useful rows in property-defined regimes."
+    },
+    {
+      "path": "results_frontier_v4_paper_robustness/robustness_04_real_world_probes.png",
+      "description": "External real-world probe predictions and support/OOD flags."
+    },
+    {
+      "path": "results_frontier_v4_paper_robustness/robustness_05_metric_nmae_nvar.png",
+      "description": "Subset rerun comparing NRMSE and standardized NMAE advantage."
+    },
+    {
+      "path": "results_frontier_v4_paper_robustness/robustness_06_mechanism_guardrail.png",
+      "description": "Paired J=0 vs calibrated-coupling QRC guardrail on property-defined subset."
+    }
+  ],
+  "report": "PAPER_ROBUSTNESS_REPORT.md"
+}

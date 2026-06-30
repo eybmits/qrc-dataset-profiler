@@ -1,8 +1,9 @@
-"""Standard-Spin v1 exact-statevector reservoir.
+"""Standard-Spin v1 exact-statevector and dissipative reservoir.
 
 The implementation vendors the minimal statevector machinery needed by the
 frozen protocol: single-qubit gates, diagonal Ising-ZZ phases, projective input
-reset, virtual-node measurements, and finite-shot Pauli expectation noise.
+reset, virtual-node measurements, weak local dissipation, and finite-shot Pauli
+expectation noise.
 Couplings are the uniform protocol values J and h; the seed affects only
 finite-shot noise.
 """
@@ -46,6 +47,25 @@ def _apply_single_qubit_gate(state: ComplexArray, gate: ComplexArray, qubit: int
     return np.ascontiguousarray(restored.reshape(-1))
 
 
+def _apply_gate_axis(tensor: ComplexArray, gate: ComplexArray, axis: int) -> ComplexArray:
+    updated = np.tensordot(gate, tensor, axes=([1], [axis]))
+    return np.moveaxis(updated, 0, axis)
+
+
+def _apply_single_qubit_gate_density(rho: ComplexArray, gate: ComplexArray, qubit: int, n_qubits: int) -> ComplexArray:
+    tensor = rho.reshape((2,) * (2 * n_qubits))
+    tensor = _apply_gate_axis(tensor, gate, qubit)
+    tensor = _apply_gate_axis(tensor, gate.conj(), n_qubits + qubit)
+    return np.ascontiguousarray(tensor.reshape(rho.shape))
+
+
+def _apply_single_qubit_channel_density(rho: ComplexArray, kraus_ops: tuple[ComplexArray, ...], qubit: int, n_qubits: int) -> ComplexArray:
+    out = np.zeros_like(rho)
+    for kraus in kraus_ops:
+        out += _apply_single_qubit_gate_density(rho, kraus, qubit, n_qubits)
+    return out
+
+
 def _bit_mask(qubit: int, n_qubits: int) -> int:
     return 1 << (n_qubits - qubit - 1)
 
@@ -67,6 +87,22 @@ def _add_shot_noise(features: FloatArray, shots: int, rng: np.random.Generator) 
     return np.clip(noisy, -1.0, 1.0).astype(np.float64)
 
 
+def _amplitude_damping_kraus(prob: float) -> tuple[ComplexArray, ComplexArray]:
+    p = float(np.clip(prob, 0.0, 1.0))
+    return (
+        np.array([[1.0, 0.0], [0.0, np.sqrt(1.0 - p)]], dtype=np.complex128),
+        np.array([[0.0, np.sqrt(p)], [0.0, 0.0]], dtype=np.complex128),
+    )
+
+
+def _dephasing_kraus(prob: float) -> tuple[ComplexArray, ComplexArray]:
+    p = float(np.clip(prob, 0.0, 0.5))
+    return (
+        np.sqrt(1.0 - p) * np.eye(2, dtype=np.complex128),
+        np.sqrt(p) * np.array([[1.0, 0.0], [0.0, -1.0]], dtype=np.complex128),
+    )
+
+
 @dataclass
 class StandardSpinV1:
     """Fixed transverse-field Ising spin reservoir from PROTOCOL.md section 5."""
@@ -79,6 +115,11 @@ class StandardSpinV1:
     topology: str = "ring"
     virtual_nodes: int = 5
     reupload: bool = True
+    amplitude_damping: float = 0.0
+    dephasing: float = 0.0
+    dissipation_method: str = "trajectory"
+    coupling_mode: str = "uniform"
+    coupling_seed: int = 0
     shots: int | None = None
     seed: int = 0
 
@@ -89,31 +130,67 @@ class StandardSpinV1:
             raise ValueError("depth must be >= 1")
         if int(self.virtual_nodes) < 1:
             raise ValueError("virtual_nodes must be >= 1")
-        if self.topology not in {"ring", "chain"}:
-            raise ValueError("topology must be 'ring' or 'chain'")
+        if self.topology not in {"ring", "chain", "complete"}:
+            raise ValueError("topology must be 'ring', 'chain', or 'complete'")
+        if self.coupling_mode not in {"uniform", "disordered"}:
+            raise ValueError("coupling_mode must be 'uniform' or 'disordered'")
+        if not (0.0 <= float(self.amplitude_damping) <= 1.0):
+            raise ValueError("amplitude_damping must be in [0, 1]")
+        if not (0.0 <= float(self.dephasing) <= 0.5):
+            raise ValueError("dephasing must be in [0, 0.5]")
+        if self.dissipation_method not in {"trajectory", "density"}:
+            raise ValueError("dissipation_method must be 'trajectory' or 'density'")
         if self.shots is not None and int(self.shots) < 1:
             raise ValueError("shots must be a positive integer or None")
 
     @property
     def pairs(self) -> list[tuple[int, int]]:
+        if self.topology == "complete":
+            return [(i, j) for i in range(self.n_qubits) for j in range(i + 1, self.n_qubits)]
         pairs = [(i, i + 1) for i in range(self.n_qubits - 1)]
         if self.topology == "ring" and self.n_qubits > 1:
             pairs.append((self.n_qubits - 1, 0))
         return pairs
 
     @property
+    def pair_couplings(self) -> FloatArray:
+        n_pairs = len(self.pairs)
+        if n_pairs == 0:
+            return np.empty(0, dtype=np.float64)
+        if self.coupling_mode == "uniform":
+            return np.full(n_pairs, float(self.J), dtype=np.float64)
+        if abs(float(self.J)) < 1e-15:
+            return np.zeros(n_pairs, dtype=np.float64)
+        rng = np.random.default_rng(int(self.coupling_seed))
+        raw = rng.uniform(-1.0, 1.0, size=n_pairs)
+        rms = float(np.sqrt(np.mean(raw**2)))
+        if rms < 1e-12:
+            return np.full(n_pairs, float(self.J), dtype=np.float64)
+        return (float(self.J) * raw / rms).astype(np.float64)
+
+    @property
     def feature_dim(self) -> int:
         return min(self.virtual_nodes, self.depth) * (self.n_qubits + len(self.pairs))
 
-    def transform(self, inputs: np.ndarray) -> FloatArray:
-        """Advance one persistent reservoir through a scalar driving sequence."""
+    def transform(self, inputs: np.ndarray, *, inputs_are_scaled: bool = False) -> FloatArray:
+        """Advance one persistent reservoir through a scalar driving sequence.
 
-        u01 = self._scale_inputs(inputs)
+        By default, inputs are internally squashed to ``[0, 1]`` for backwards
+        compatibility with the original protocol. Publication protocols that
+        require train-split-only preprocessing should pass already scaled inputs
+        and set ``inputs_are_scaled=True``.
+        """
+
+        u01 = np.asarray(inputs, dtype=np.float64).reshape(-1) if inputs_are_scaled else self._scale_inputs(inputs)
+        if inputs_are_scaled:
+            u01 = np.clip(u01, 0.0, 1.0).astype(np.float64)
+        if self._uses_density_matrix:
+            return self._transform_density(u01)
         state = self._zero_state()
         rng = np.random.default_rng(self.seed)
         signs_z = _z_signs(self.n_qubits)
         signs_zz = np.vstack([signs_z[i] * signs_z[j] for i, j in self.pairs]) if self.pairs else np.empty((0, state.size))
-        zz_phase = self._zz_phase(signs_zz)
+        zz_phase = self._zz_phase(signs_zz, self.pair_couplings)
         record_from = self.depth - min(self.virtual_nodes, self.depth)
 
         out = np.empty((u01.size, self.feature_dim), dtype=np.float64)
@@ -129,6 +206,7 @@ class StandardSpinV1:
                 rx_gate = _rx(float(2.0 * self.h * self.dt))
                 for qubit in range(self.n_qubits):
                     state = _apply_single_qubit_gate(state, rx_gate, qubit, self.n_qubits)
+                state = self._apply_dissipation_trajectory(state, rng)
                 if layer >= record_from:
                     row_parts.append(self._measure_z_zz(state, signs_z, signs_zz))
             features = np.concatenate(row_parts)
@@ -137,10 +215,18 @@ class StandardSpinV1:
             out[t] = np.clip(features, -1.0, 1.0)
         return out
 
+    @property
+    def _uses_density_matrix(self) -> bool:
+        return self.dissipation_method == "density" and (float(self.amplitude_damping) > 0.0 or float(self.dephasing) > 0.0)
+
     def _zero_state(self) -> ComplexArray:
         state = np.zeros(2**self.n_qubits, dtype=np.complex128)
         state[0] = 1.0 + 0.0j
         return state
+
+    def _zero_density(self) -> ComplexArray:
+        state = self._zero_state()
+        return np.outer(state, state.conj()).astype(np.complex128)
 
     def _inject_input(self, state: ComplexArray, u_t: float) -> ComplexArray:
         tensor = state.reshape((2,) * self.n_qubits).copy()
@@ -156,15 +242,119 @@ class StandardSpinV1:
         theta = 2.0 * np.arcsin(np.sqrt(float(np.clip(u_t, 0.0, 1.0))))
         return _apply_single_qubit_gate(state, _ry(theta), 0, self.n_qubits)
 
-    def _zz_phase(self, signs_zz: FloatArray) -> ComplexArray:
+    def _apply_dissipation_trajectory(self, state: ComplexArray, rng: np.random.Generator) -> ComplexArray:
+        if float(self.amplitude_damping) <= 0.0 and float(self.dephasing) <= 0.0:
+            return state
+        lowering = np.array([[0.0, 1.0], [0.0, 0.0]], dtype=np.complex128)
+        no_jump = np.array([[1.0, 0.0], [0.0, np.sqrt(1.0 - float(self.amplitude_damping))]], dtype=np.complex128)
+        z_gate = np.array([[1.0, 0.0], [0.0, -1.0]], dtype=np.complex128)
+        for qubit in range(self.n_qubits):
+            if self.amplitude_damping > 0.0:
+                p_one = self._prob_one(state, qubit)
+                if rng.random() < float(self.amplitude_damping) * p_one:
+                    state = _apply_single_qubit_gate(state, lowering, qubit, self.n_qubits)
+                else:
+                    state = _apply_single_qubit_gate(state, no_jump, qubit, self.n_qubits)
+                state = self._normalize_state(state)
+            if self.dephasing > 0.0 and rng.random() < float(self.dephasing):
+                state = _apply_single_qubit_gate(state, z_gate, qubit, self.n_qubits)
+        return state
+
+    def _prob_one(self, state: ComplexArray, qubit: int) -> float:
+        tensor = state.reshape((2,) * self.n_qubits)
+        slc = [slice(None)] * self.n_qubits
+        slc[qubit] = 1
+        return float(np.sum(np.abs(tensor[tuple(slc)]) ** 2))
+
+    def _normalize_state(self, state: ComplexArray) -> ComplexArray:
+        norm = float(np.linalg.norm(state))
+        if not np.isfinite(norm) or norm < 1e-12:
+            return self._zero_state()
+        return (state / norm).astype(np.complex128)
+
+    def _inject_input_density(self, rho: ComplexArray, u_t: float) -> ComplexArray:
+        tensor = rho.reshape((2,) * (2 * self.n_qubits))
+        rest = np.trace(tensor, axis1=0, axis2=self.n_qubits)
+        u = float(np.clip(u_t, 0.0, 1.0))
+        amp0 = np.sqrt(1.0 - u)
+        amp1 = np.sqrt(u)
+        input_rho = np.array([[amp0 * amp0, amp0 * amp1], [amp0 * amp1, amp1 * amp1]], dtype=np.complex128)
+        combined = np.tensordot(input_rho, rest, axes=0)
+        combined = np.moveaxis(combined, 1, self.n_qubits)
+        return np.ascontiguousarray(combined.reshape(rho.shape))
+
+    def _zz_phase(self, signs_zz: FloatArray, couplings: FloatArray) -> ComplexArray:
         if signs_zz.size == 0:
             return np.ones(2**self.n_qubits, dtype=np.complex128)
-        exponent = np.sum(signs_zz, axis=0)
-        return np.exp(-0.5j * float(2.0 * self.J * self.dt) * exponent).astype(np.complex128)
+        exponent = np.asarray(couplings, dtype=np.float64) @ signs_zz
+        return np.exp(-0.5j * float(2.0 * self.dt) * exponent).astype(np.complex128)
+
+    def _transform_density(self, u01: FloatArray) -> FloatArray:
+        rho = self._zero_density()
+        rng = np.random.default_rng(self.seed)
+        signs_z = _z_signs(self.n_qubits)
+        signs_zz = np.vstack([signs_z[i] * signs_z[j] for i, j in self.pairs]) if self.pairs else np.empty((0, rho.shape[0]))
+        phase = self._zz_phase(signs_zz, self.pair_couplings)
+        zz_phase_density = phase[:, None] * phase.conj()[None, :]
+        rx_gate = _rx(float(2.0 * self.h * self.dt))
+        record_from = self.depth - min(self.virtual_nodes, self.depth)
+
+        amp_kraus = _amplitude_damping_kraus(self.amplitude_damping) if self.amplitude_damping > 0.0 else None
+        dephase_kraus = _dephasing_kraus(self.dephasing) if self.dephasing > 0.0 else None
+
+        out = np.empty((u01.size, self.feature_dim), dtype=np.float64)
+        for t, u_t in enumerate(u01):
+            rho = self._inject_input_density(rho, float(u_t))
+            row_parts: list[FloatArray] = []
+            rz_gate = _rz(float(np.pi * u_t))
+            for layer in range(self.depth):
+                if self.reupload:
+                    for qubit in range(self.n_qubits):
+                        rho = _apply_single_qubit_gate_density(rho, rz_gate, qubit, self.n_qubits)
+                rho *= zz_phase_density
+                for qubit in range(self.n_qubits):
+                    rho = _apply_single_qubit_gate_density(rho, rx_gate, qubit, self.n_qubits)
+                rho = self._apply_dissipation_density(rho, amp_kraus, dephase_kraus)
+                if layer >= record_from:
+                    row_parts.append(self._measure_z_zz_density(rho, signs_z, signs_zz))
+            features = np.concatenate(row_parts)
+            if self.shots is not None:
+                features = _add_shot_noise(features, self.shots, rng)
+            out[t] = np.clip(features, -1.0, 1.0)
+        return out
+
+    def _apply_dissipation_density(
+        self,
+        rho: ComplexArray,
+        amp_kraus: tuple[ComplexArray, ...] | None,
+        dephase_kraus: tuple[ComplexArray, ...] | None,
+    ) -> ComplexArray:
+        if amp_kraus is None and dephase_kraus is None:
+            return rho
+        for qubit in range(self.n_qubits):
+            if amp_kraus is not None:
+                rho = _apply_single_qubit_channel_density(rho, amp_kraus, qubit, self.n_qubits)
+            if dephase_kraus is not None:
+                rho = _apply_single_qubit_channel_density(rho, dephase_kraus, qubit, self.n_qubits)
+        trace = np.trace(rho)
+        if np.isfinite(trace) and abs(trace) > 1e-12:
+            rho = rho / trace
+        return 0.5 * (rho + rho.conj().T)
 
     @staticmethod
     def _measure_z_zz(state: ComplexArray, signs_z: FloatArray, signs_zz: FloatArray) -> FloatArray:
         probs = np.abs(state) ** 2
+        z = signs_z @ probs
+        zz = signs_zz @ probs if signs_zz.size else np.empty(0, dtype=np.float64)
+        return np.concatenate([z, zz]).astype(np.float64)
+
+    @staticmethod
+    def _measure_z_zz_density(rho: ComplexArray, signs_z: FloatArray, signs_zz: FloatArray) -> FloatArray:
+        probs = np.real(np.diag(rho))
+        probs = np.maximum(probs, 0.0)
+        total = float(np.sum(probs))
+        if total > 1e-12:
+            probs = probs / total
         z = signs_z @ probs
         zz = signs_zz @ probs if signs_zz.size else np.empty(0, dtype=np.float64)
         return np.concatenate([z, zz]).astype(np.float64)

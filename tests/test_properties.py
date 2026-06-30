@@ -8,6 +8,7 @@ from qrc_dataset_profiler.properties import (
     _adf_p,
     _lyapunov_rosenstein,
     _zero_one_K,
+    compute_extended_features,
     profile_dataset,
 )
 from qrc_dataset_profiler.spec import Dataset, DatasetSpec
@@ -32,6 +33,8 @@ def test_white_noise_has_short_memory_and_dfa_near_half():
     assert rec.ac_timescale <= 3
     assert rec.dfa_valid
     assert abs(rec.dfa_alpha - 0.5) <= 0.15
+    assert np.isfinite(rec.sample_entropy)
+    assert np.isfinite(rec.hurst_rs)
 
 
 def test_ar2_is_mostly_linear():
@@ -60,6 +63,27 @@ def test_clean_sine_high_forecastability_low_spectral_entropy():
     assert rec.spectral_entropy < 0.25
 
 
+def test_extended_features_are_deterministic_and_broad():
+    rng = np.random.default_rng(123)
+    x = rng.normal(size=600)
+
+    a = compute_extended_features(x)
+    b = compute_extended_features(x)
+
+    assert a.keys() == b.keys()
+    assert len(a) >= 20
+    assert "ext_sample_entropy_m2" in a
+    assert "ext_recurrence_rate" in a
+    assert "ext_arch_lm5" in a
+    for key in a:
+        av = a[key]
+        bv = b[key]
+        if np.isnan(av):
+            assert np.isnan(bv), key
+        else:
+            assert av == bv, key
+
+
 # --- regression tests for the four review fixes -------------------------------
 
 def test_lyapunov_no_false_positive_on_pure_sine():
@@ -75,6 +99,9 @@ def test_chirp_predictive_outputs_bounded():
     rec = profile_dataset(generate(spec))
     assert -1.0 <= rec.r2_linear <= 1.0
     assert -2.0 <= rec.nl_gain <= 2.0
+    assert np.isfinite(rec.pred_nrmse_linear)
+    assert np.isfinite(rec.pred_nrmse_gbm)
+    assert np.isfinite(rec.predictability_gap_linear_gbm)
 
 
 def test_zero_one_chaos_vs_regular():

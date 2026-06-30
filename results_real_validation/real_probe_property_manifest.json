@@ -1,0 +1,51 @@
+{
+  "analysis_version": "real-external-validation-v1",
+  "artifact": "real_window_property_atlas",
+  "n_rows": 31,
+  "window_length": 800,
+  "min_length": 120,
+  "max_windows_requested": 96,
+  "max_windows_per_series": 2,
+  "seed": 0,
+  "include_m4": true,
+  "sources_requested": [
+    "silso_sunspots_monthly",
+    "pjme_hourly_load",
+    "melbourne_daily_min_temperature",
+    "fred_usd_eur_exchange",
+    "noaa_mauna_loa_co2",
+    "ett_hourly_etth1",
+    "ett_hourly_etth2",
+    "ett_minute_ettm1",
+    "airline_passengers_monthly",
+    "m4_monthly_sample"
+  ],
+  "sources_written": [
+    "airline_passengers_monthly",
+    "ett_hourly_etth1",
+    "ett_hourly_etth2",
+    "ett_minute_ettm1",
+    "fred_usd_eur_exchange",
+    "m4_monthly_sample",
+    "melbourne_daily_min_temperature",
+    "noaa_mauna_loa_co2",
+    "pjme_hourly_load",
+    "silso_sunspots_monthly"
+  ],
+  "domains": {
+    "electricity_load": 2,
+    "electricity_transformer": 6,
+    "environment": 2,
+    "exchange_rate": 2,
+    "m4_monthly": 14,
+    "solar_activity": 2,
+    "transport": 1,
+    "weather": 2
+  },
+  "claim_boundary": "Real property probes are external validation inputs; no real QRC/ESN labels are used to train the synthetic regime map.",
+  "outputs": [
+    "real_window_property_atlas.csv",
+    "real_windows.npz",
+    "real_probe_property_manifest.json"
+  ]
+}

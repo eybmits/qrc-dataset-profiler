@@ -1,0 +1,101 @@
+\documentclass[conference,a4paper]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage[caption=false,font=footnotesize]{subfig}
+\usepackage{cleveref}
+
+\definecolor{PaperLinkBlue}{HTML}{0057FF}
+\definecolor{NeonRefGreen}{HTML}{39FF14}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=PaperLinkBlue,
+  urlcolor=PaperLinkBlue,
+  filecolor=PaperLinkBlue,
+  citecolor=NeonRefGreen,
+  pdfauthor={Anonymous Authors},
+  pdftitle={Mapping Quantum Reservoir Advantage},
+  pdfsubject={Quantum reservoir computing, time-series forecasting, benchmark atlas, echo state networks}
+}
+
+\renewcommand{\tableautorefname}{Tab.}
+\renewcommand{\figureautorefname}{Fig.}
+\graphicspath{{gfx/}}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{7pt plus 2pt minus 2pt}
+\setlength{\intextsep}{7pt plus 2pt minus 2pt}
+\interdisplaylinepenalty=2500
+\raggedbottom
+
+\newcommand{\qrc}{\mathrm{QRC}}
+\newcommand{\esn}{\mathrm{ESN}}
+\newcommand{\nrmse}{\mathrm{NRMSE}}
+\newcommand{\mae}{\mathrm{MAE}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Tr}{\operatorname{Tr}}
+
+\begin{document}
+
+\title{Mapping Quantum Reservoir Advantage}
+
+\author{%
+\IEEEauthorblockN{Anonymous Authors}
+\IEEEauthorblockA{Anonymous submission}
+}
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\begin{IEEEkeywords}
+quantum reservoir computing, echo state networks, time-series forecasting, benchmark atlas, quantum advantage triage
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:introduction}
+\input{sections/introduction}
+
+\section{Preliminaries}
+\label{sec:background}
+\input{sections/background}
+
+\section{Related Work}
+\label{sec:relatedwork}
+\input{sections/related-work}
+
+\section{Methodology}
+\label{sec:methodology}
+\input{sections/methodology}
+
+\section{Experimental Setup}
+\label{sec:experimental}
+\input{sections/experimental-section}
+
+\section{Evaluation}
+\label{sec:evaluation}
+\input{sections/evaluation}
+
+\section{Conclusion}
+\label{sec:conclusion}
+\input{sections/conclusion}
+
+\section*{Reproducibility and Claim Boundary}
+The artifact tree separates the protocol, labels, analysis tables, figures, and paper draft. The main v5 evidence used here is stored under \texttt{results\_frontier\_v5\_discovery/}, \texttt{results\_frontier\_v5\_validation/}, and \texttt{results\_v5\_publication/}. The title uses ``quantum reservoir advantage'' in the empirical benchmark sense: lower forecasting error for a frozen QRC variant than for a frozen feature-matched ESN under the declared protocol. We do not claim computational quantum advantage, broad average QRC superiority, or a proven coupling/interference mechanism.
+
+\bibliographystyle{IEEEtranDoi}
+\bibliography{references}
+\end{document}

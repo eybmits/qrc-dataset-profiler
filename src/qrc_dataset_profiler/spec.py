@@ -11,7 +11,7 @@ from typing import Any
 
 import math
 
-SCHEMA_VERSION = "v1"
+SCHEMA_VERSION = "v2"
 
 # Minimum series length for fragile estimators to be considered valid.
 MIN_LENGTH_LYAPUNOV = 500
@@ -109,9 +109,14 @@ class DatasetRecord:
     dfa_valid: bool = False
     # 9 Complexity
     perm_entropy: float = NAN
+    sample_entropy: float = NAN
+    # 10 Rescaled-range long memory
+    hurst_rs: float = NAN
     # 10 Predictability
     forecastability: float = NAN
+    pred_nrmse_linear: float = NAN
     pred_nrmse_gbm: float = NAN
+    predictability_gap_linear_gbm: float = NAN
 
     # --- Block D: ground truth (synthetic only; NaN/None for real) ---
     true_lyapunov: float = NAN
@@ -141,8 +146,36 @@ CORE_AXIS_FIELDS: tuple[str, ...] = (
     "lyapunov", "zero_one_K",
     "spectral_entropy", "dom_freq", "spectral_flatness",
     "adf_p", "kpss_p", "n_diffs",
-    "dfa_alpha", "perm_entropy",
+    "dfa_alpha", "perm_entropy", "sample_entropy", "hurst_rs",
     "forecastability", "pred_nrmse_gbm",
+)
+TIER_A_UPGRADE_FIELDS: tuple[str, ...] = (
+    "predictability_gap_linear_gbm",
+    "ext_volatility_ac1",
+    "ext_arch_lm5",
+    "ext_recurrence_rate",
+    "ext_recurrence_determinism",
+    "ext_psd_slope",
+    "ext_spectral_centroid",
+    "ext_trend_strength",
+    "ext_changepoint_count",
+    "ext_lz_complexity",
+)
+FRONTIER_TIER_A_FIELDS: tuple[str, ...] = CORE_AXIS_FIELDS + TIER_A_UPGRADE_FIELDS
+TIER_B_EXTENDED_FIELDS: tuple[str, ...] = (
+    "ext_approx_entropy_m2",
+    "ext_spectral_bandwidth",
+    "ext_spectral_rolloff85",
+    "ext_zero_crossing_rate",
+    "ext_turning_point_rate",
+    "ext_outlier_rate_3sigma",
+    "ext_spike_rate_mad6",
+    "ext_seasonality_strength",
+    "ext_fnn_fraction",
+    "ext_corr_dim_approx",
+    "ext_bds_like",
+    "ext_zero_fraction",
+    "ext_cv2_positive",
 )
 GROUND_TRUTH_FIELDS: tuple[str, ...] = (
     "true_lyapunov", "true_memory_order", "true_n_frequencies", "true_hurst", "is_chaotic",

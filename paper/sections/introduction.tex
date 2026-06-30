@@ -1,0 +1,16 @@
+Quantum reservoir computing follows a simple hybrid-learning pattern: fixed quantum dynamics transform an input stream into measured expectation-value features, and only a classical readout is trained~\cite{fujii2017harnessing,nakajima2019boosting,ghosh2019quantum}. This makes QRC attractive for near-term time-series forecasting because the quantum component is not variationally optimized. The open benchmark question is different from the hardware-scaling question: \emph{given a new dataset, when is a quantum reservoir worth trying against a strong classical reservoir?}
+
+We answer this question empirically through a large dataset-regime atlas. We use ``quantum reservoir advantage'' in a deliberately scoped sense: a frozen QRC protocol has lower test error than a frozen feature-matched ESN on the same forecasting task. This is not a complexity-theoretic quantum-advantage claim. It is a benchmark claim about which dataset regimes favor a fixed quantum reservoir feature map over a canonical ESN feature map.
+
+The central result is selective rather than universal. Across the held-out validation split, the best frozen QRC variant beats the ESN in 32.4\% of datasets and is clearly useful in 12.5\%. The mean best-QRC advantage is negative, so the ESN remains the stronger default. Yet the QRC wins are not noise. They recur across independent discovery and validation splits and are predictable from precomputed dataset descriptors. A meta-model trained on discovery rows distinguishes QRC-useful validation cases with ROC-AUC 0.836 and PR-AUC 0.431, more than three times the 12.5\% base useful rate.
+
+This changes the practical question. Instead of asking whether QRC is generally better than ESNs, the atlas asks whether a dataset lies in a QRC-favorable regime. The strongest regimes involve slow, stateful temporal structure: drifting trends, regime changes, persistent low-frequency components, long memory, and temporally correlated fluctuations. The useful regions are not summarized by one scalar descriptor. They arise from interactions among trend strength, spectral structure, persistence, volatility memory, predictability, and nonstationarity.
+
+Our contributions are:
+\begin{itemize}
+    \item \textbf{A frozen-protocol QRC--ESN atlas:} we evaluate 20,000 labeled discovery/validation datasets from 52 base generators and 16 broad time-series families under globally calibrated, then frozen, QRC and ESN protocols.
+    \item \textbf{Dataset-level advantage triage:} measured dataset properties predict where QRC is useful, enabling a practitioner to screen candidate datasets before running a quantum reservoir.
+    \item \textbf{Regime-level evidence:} QRC-favorable regions concentrate in slow, stateful dynamics rather than in a broad average advantage.
+    \item \textbf{Anti-circularity checks:} the prediction signal remains strong after removing direct predictability proxies and under restricted feature families.
+    \item \textbf{Claim boundary:} we provide a benchmark and regime map, not a proof of computational quantum advantage or a causal mechanism for quantum dynamics.
+\end{itemize}

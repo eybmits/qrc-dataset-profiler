@@ -1,0 +1,49 @@
+{
+  "analysis_version": "quantum-attribution-v1",
+  "catalog_rows_input": 1000,
+  "catalog_rows_selected": 1000,
+  "rows_written": 1000,
+  "families": [
+    "chaotic_flow",
+    "chaotic_map",
+    "colored_noise",
+    "input_driven",
+    "linear_stochastic",
+    "long_range",
+    "nonlinear_stochastic",
+    "nonstationary",
+    "oscillatory"
+  ],
+  "matched_qrc_seeds": [
+    0
+  ],
+  "bootstrap_replicates": 1000,
+  "reservoir": {
+    "J_values": [
+      1.0,
+      0.0
+    ],
+    "h": 1.0,
+    "dt": 0.25,
+    "n_qubits": 6,
+    "depth": 5,
+    "virtual_nodes": 5,
+    "topology": "ring",
+    "shots": null,
+    "reupload": false,
+    "amplitude_damping": 0.02,
+    "dephasing": 0.01,
+    "dissipation_method": "trajectory",
+    "feature_dim_J1": 60,
+    "feature_dim_J0": 60
+  },
+  "scoring_protocol": "qrc_nrmse_standard with train-split-only input scaling",
+  "paired_effect_definition": "paired_delta_J0_minus_J1 = nrmse_qrc_J0 - nrmse_qrc_J1; positive means J=1 has lower NRMSE.",
+  "claim_boundary": "Only a robust positive paired effect would support a coupling-attribution claim. Null or negative intervals must be reported as evidence against that mechanism claim.",
+  "outputs": [
+    "attribution_manifest.json",
+    "family_attribution_bootstrap.csv",
+    "family_attribution_bootstrap.png",
+    "paired_attribution.csv"
+  ]
+}

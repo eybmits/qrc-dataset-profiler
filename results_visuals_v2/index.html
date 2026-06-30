@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QRC Usefulness Atlas Visual Suite</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --surface: #FCFCFD;
+      --panel: #FFFFFF;
+      --ink: #1F2430;
+      --muted: #6F768A;
+      --axis: #D7DBE7;
+      --blue: #5477C4;
+      --orange: #CC6F47;
+    }
+    body {
+      margin: 0;
+      background: var(--surface);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+    header {
+      padding: 36px min(6vw, 72px) 22px;
+      border-bottom: 1px solid var(--axis);
+      background: var(--panel);
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 5vw, 52px);
+      letter-spacing: 0;
+    }
+    .sub {
+      max-width: 1040px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+      max-width: 1120px;
+    }
+    .card {
+      border: 1px solid var(--axis);
+      background: var(--surface);
+      padding: 12px 14px;
+      border-radius: 8px;
+    }
+    .card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .card strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 24px;
+    }
+    main {
+      padding: 28px min(6vw, 72px) 56px;
+    }
+    .claim {
+      max-width: 1120px;
+      margin: 0 0 28px;
+      padding-left: 14px;
+      border-left: 4px solid var(--orange);
+      color: var(--muted);
+    }
+    .figure {
+      margin: 0 0 34px;
+      padding: 20px;
+      background: var(--panel);
+      border: 1px solid var(--axis);
+      border-radius: 8px;
+      max-width: 1320px;
+    }
+    .figure h2 {
+      margin: 0 0 4px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+    .figure p {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid #E6E8F0;
+      border-radius: 4px;
+      background: white;
+    }
+    .links {
+      margin-top: 10px !important;
+      font-size: 13px;
+    }
+    a { color: var(--blue); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>QRC Usefulness Atlas Visual Suite</h1>
+    <p class="sub">A reproducible figure package for the 1000-row sweep over 50 benchmark datasets. Strongest useful family: <strong>nonstationary</strong>; corrected coupling attribution remains <strong>positive</strong>.</p>
+    <div class="cards"><div class='card'><span>Rows</span><strong>1,000</strong></div>
+<div class='card'><span>QRC-useful</span><strong>36</strong></div>
+<div class='card'><span>Near ties</span><strong>246</strong></div>
+<div class='card'><span>Baseline preferred</span><strong>718</strong></div>
+<div class='card'><span>Meta R2</span><strong>0.757</strong></div>
+<div class='card'><span>Meta AUC</span><strong>0.814</strong></div></div>
+  </header>
+  <main>
+    <p class="claim">Claim boundary: this suite supports dataset categorization and meta-model analysis. It does not claim broad average QRC superiority or a quantum coupling/entanglement mechanism.</p>
+    
+        <section class="figure">
+          <h2>00 Visual Abstract</h2>
+          <p>Executive visual summary of the full QRC usefulness atlas.</p>
+          <img src="00_visual_abstract.png" alt="00 Visual Abstract">
+          <p class="links"><a href="00_visual_abstract.png">PNG</a> | <a href="00_visual_abstract.pdf">PDF</a></p>
+        </section>
+        
+
+        <section class="figure">
+          <h2>01 Property Landscape</h2>
+          <p>Two-panel property map of observed and predicted QRC usefulness.</p>
+          <img src="01_property_landscape.png" alt="01 Property Landscape">
+          <p class="links"><a href="01_property_landscape.png">PNG</a> | <a href="01_property_landscape.pdf">PDF</a></p>
+        </section>
+        
+
+        <section class="figure">
+          <h2>02 Sweep Barcode</h2>
+          <p>Full sweep barcode by generator/control group and parameter variant.</p>
+          <img src="02_sweep_barcode.png" alt="02 Sweep Barcode">
+          <p class="links"><a href="02_sweep_barcode.png">PNG</a> | <a href="02_sweep_barcode.pdf">PDF</a></p>
+        </section>
+        
+
+        <section class="figure">
+          <h2>03 Family Outcomes</h2>
+          <p>Family outcome shares and advantage confidence intervals.</p>
+          <img src="03_family_outcomes.png" alt="03 Family Outcomes">
+          <p class="links"><a href="03_family_outcomes.png">PNG</a> | <a href="03_family_outcomes.pdf">PDF</a></p>
+        </section>
+        
+
+        <section class="figure">
+          <h2>04 Advantage Distributions</h2>
+          <p>Within-family QRC advantage distributions with bootstrap mean intervals.</p>
+          <img src="04_advantage_distributions.png" alt="04 Advantage Distributions">
+          <p class="links"><a href="04_advantage_distributions.png">PNG</a> | <a href="04_advantage_distributions.pdf">PDF</a></p>
+        </section>
+        
+
+        <section class="figure">
+          <h2>05 Meta Model Evidence</h2>
+          <p>Meta-model prediction, importance, robustness, and residual diagnostics.</p>
+          <img src="05_meta_model_evidence.png" alt="05 Meta Model Evidence">
+          <p class="links"><a href="05_meta_model_evidence.png">PNG</a> | <a href="05_meta_model_evidence.pdf">PDF</a></p>
+        </section>
+        
+
+        <section class="figure">
+          <h2>06 Extended Feature Map</h2>
+          <p>Extended feature correlations and family-level feature heatmap.</p>
+          <img src="06_extended_feature_map.png" alt="06 Extended Feature Map">
+          <p class="links"><a href="06_extended_feature_map.png">PNG</a> | <a href="06_extended_feature_map.pdf">PDF</a></p>
+        </section>
+        
+
+        <section class="figure">
+          <h2>07 Quantum Attribution Guardrail</h2>
+          <p>Paired J=1 versus J=0 control intervals and scatter.</p>
+          <img src="07_quantum_attribution_guardrail.png" alt="07 Quantum Attribution Guardrail">
+          <p class="links"><a href="07_quantum_attribution_guardrail.png">PNG</a> | <a href="07_quantum_attribution_guardrail.pdf">PDF</a></p>
+        </section>
+        
+
+        <section class="figure">
+          <h2>08 Full Catalog Inventory</h2>
+          <p>Full 50-row benchmark inventory with core properties and QRC advantage.</p>
+          <img src="08_full_catalog_inventory.png" alt="08 Full Catalog Inventory">
+          <p class="links"><a href="08_full_catalog_inventory.png">PNG</a> | <a href="08_full_catalog_inventory.pdf">PDF</a></p>
+        </section>
+        
+
+        <section class="figure">
+          <h2>09 All Points Feature Regressions</h2>
+          <p>All finite sweep rows plotted against top features with regression lines and confidence bands.</p>
+          <img src="09_all_points_feature_regressions.png" alt="09 All Points Feature Regressions">
+          <p class="links"><a href="09_all_points_feature_regressions.png">PNG</a> | <a href="09_all_points_feature_regressions.pdf">PDF</a></p>
+        </section>
+        
+  </main>
+</body>
+</html>

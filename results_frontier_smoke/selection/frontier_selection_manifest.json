@@ -1,0 +1,32 @@
+{
+  "analysis_version": "frontier-atlas-v1",
+  "artifact": "evaluation_selection",
+  "property_atlas_path": "results_frontier_smoke/property/frontier_property_atlas.csv",
+  "n_property_rows": 20,
+  "n_selected": 10,
+  "n_discovery": 5,
+  "n_validation": 5,
+  "selection_uses_targets": false,
+  "target_columns_ignored": [
+    "nrmse_linear",
+    "nrmse_esn_matched",
+    "nrmse_qrc_spin",
+    "nrmse_gbm",
+    "qrc_advantage"
+  ],
+  "selection_roles": {
+    "broad_balanced": 4,
+    "feature_space_coverage": 4,
+    "frontier_enriched": 2
+  },
+  "families_selected": {
+    "chaotic_flow": 5,
+    "input_driven": 2,
+    "oscillatory": 3
+  },
+  "claim_boundary": "Selection is target-free and must be frozen before QRC/ESN labels are computed.",
+  "outputs": [
+    "frontier_evaluation_selection.csv",
+    "frontier_selection_manifest.json"
+  ]
+}

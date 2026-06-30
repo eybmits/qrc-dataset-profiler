@@ -1,0 +1,2 @@
+model,n_samples,n_features_used,regression_r2_mean,regression_mae_mean,classification_roc_auc_mean,top_features
+gradient_boosting,1000,17,0.6651450049257429,0.14093464426744456,0.8563959004448535,"r2_linear,ac_timescale,spectral_entropy,snr_db,dfa_alpha,zero_one_K,kpss_p,pred_nrmse_gbm"
