@@ -32,6 +32,7 @@ baseline.
 - `src/qrc_dataset_profiler/run_scientific_plots.py` - dense publication-style multi-panel figures.
 - `src/qrc_dataset_profiler/run_frontier.py` - 30-feature frontier atlas, selection, and regime-map analysis.
 - `src/qrc_dataset_profiler/run_triage.py` - user-facing QRC-usefulness triage for a new CSV time series.
+- `src/qrc_dataset_profiler/run_triage_web.py` - local browser interface for the triage tool.
 - `src/qrc_dataset_profiler/frontier_plots.py` - prospective frontier publication figures.
 - `STATUS.md` - current evidence, artifact inventory, and claim boundaries.
 - `ROADMAP.md` - next planned analysis increment.
@@ -55,8 +56,9 @@ baseline.
   index in `results_v5_publication/`.
 - **Paper draft complete:** LaTeX source is under `paper/`; the compiled paper PDF is
   `paper/mapping_quantum_reservoir_advantage.pdf`.
-- **Triage CLI complete:** `run_triage` screens new univariate CSV time series for likely
-  QRC usefulness using the frozen discovery atlas and atlas-support/OOD scoring.
+- **Triage tools complete:** `run_triage` and `run_triage_web` screen new univariate CSV
+  time series for likely QRC usefulness using the frozen discovery atlas and
+  atlas-support/OOD scoring.
 
 ## Dataset Counts
 
@@ -138,6 +140,14 @@ The triage command does not run QRC or ESN on the submitted dataset. It computes
 atlas-support/OOD score, and reports whether QRC is worth testing against the frozen ESN.
 Use `--format json --out triage_report.json` for a machine-readable report. See
 `TRIAGE.md` for the CSV contract, atlas-shape notes, and interpretation boundary.
+
+Local browser interface for the same triage path:
+
+```bash
+PYTHONPATH=src python -m qrc_dataset_profiler.run_triage_web --port 8765
+```
+
+Then open `http://127.0.0.1:8765`, upload or paste a univariate CSV, and run the triage.
 
 ## Claim Boundary
 

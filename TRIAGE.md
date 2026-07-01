@@ -56,6 +56,25 @@ PYTHONPATH=src python -m qrc_dataset_profiler.run_triage \
   --out triage_report.json
 ```
 
+## Local Web Interface
+
+The same triage path is available as a local browser interface:
+
+```bash
+PYTHONPATH=src python -m qrc_dataset_profiler.run_triage_web --port 8765
+```
+
+Open:
+
+```text
+http://127.0.0.1:8765
+```
+
+The webpage accepts the same univariate CSV shape as the CLI. It sends the CSV text to a
+local `/api/triage` endpoint, computes the 30 descriptors on the Python backend, and shows
+the recommendation, predicted advantage, useful probability, atlas-support score, nearest
+atlas families, and key descriptor percentiles.
+
 ## Data Assumptions
 
 - Rows must be ordered from oldest to newest.

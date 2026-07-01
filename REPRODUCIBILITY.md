@@ -73,6 +73,12 @@ PYTHONPATH=src python -m qrc_dataset_profiler.run_triage \
   --name my_dataset
 ```
 
+Local web interface:
+
+```bash
+PYTHONPATH=src python -m qrc_dataset_profiler.run_triage_web --port 8765
+```
+
 See `TRIAGE.md` for CSV requirements and claim boundaries.
 
 ## Claim Boundary

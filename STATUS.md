@@ -68,15 +68,16 @@ Strongest validation regime:
 - `paper/`: LaTeX paper source and compiled PDF.
 - `TRIAGE.md`: public CSV contract and interpretation boundary for the triage tool.
 
-## Triage Tool
+## Triage Tools
 
-The repository now includes `qrc_dataset_profiler.run_triage`, a user-facing screening
-algorithm for new univariate CSV time series. It computes the 30 atlas descriptors, fits the
-discovery-only meta-model from the frozen v5 discovery table, adds atlas-support/OOD scoring,
-and reports whether QRC is worth testing against the frozen ESN.
+The repository now includes `qrc_dataset_profiler.run_triage` and
+`qrc_dataset_profiler.run_triage_web`, user-facing screening tools for new univariate CSV
+time series. They compute the 30 atlas descriptors, fit the discovery-only meta-model from
+the frozen v5 discovery table, add atlas-support/OOD scoring, and report whether QRC is
+worth testing against the frozen ESN.
 
-This tool is a pre-benchmark screening signal only. It does not run QRC or ESN on the
-submitted dataset and does not prove a QRC win.
+These tools are pre-benchmark screening signals only. They do not run QRC or ESN on the
+submitted dataset and do not prove a QRC win.
 
 ## Claim Boundary
 

@@ -55,8 +55,20 @@ def read_series_csv(
 
     source = Path(path)
     df = pd.read_csv(source, sep=sep, header=0 if header else None)
+    return series_from_dataframe(df, column=column, source_label=str(source), header=header)
+
+
+def series_from_dataframe(
+    df: pd.DataFrame,
+    *,
+    column: str | int | None = None,
+    source_label: str = "dataframe",
+    header: bool = True,
+) -> np.ndarray:
+    """Extract one numeric univariate series from a loaded table."""
+
     if df.empty:
-        raise ValueError(f"{source} is empty")
+        raise ValueError(f"{source_label} is empty")
     if column is None:
         if not header:
             column = 0
@@ -66,7 +78,7 @@ def read_series_csv(
                 raise ValueError(f"please pass --column; numeric-looking columns are {numeric_cols}")
             column = numeric_cols[0]
     if isinstance(column, str) and header and column not in df.columns:
-        raise ValueError(f"column {column!r} not found in {source}")
+        raise ValueError(f"column {column!r} not found in {source_label}")
     values = pd.to_numeric(df[column], errors="coerce").to_numpy(dtype=float)
     if not np.isfinite(values).any():
         raise ValueError(f"column {column!r} has no finite numeric values")
