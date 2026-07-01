@@ -11,6 +11,8 @@ goal is not to prove fundamental quantum advantage. The supported claim is condi
 dataset properties identify regimes where QRC is worth testing against a strong ESN
 baseline.
 
+Project website: `https://eybmits.github.io/qrc-dataset-profiler/`.
+
 ## Repository Map
 
 - `PROTOCOL.md` - frozen protocol contract and schema semantics.
@@ -84,6 +86,7 @@ baseline.
   prospective-validation labels.
 - `results_v5_publication/` - v5 paper-facing tables, seven figure sets, report, and HTML.
 - `paper/` - executable IEEE-style LaTeX paper source and compiled PDF.
+- `docs/` - static researcher-facing GitHub Pages website.
 - `TRIAGE.md` - public CSV contract and interpretation boundary for the triage tool.
 
 ## Quickstart

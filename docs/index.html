@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mapping Quantum Reservoir Advantage</title>
+  <meta name="description" content="A dataset-regime benchmark for quantum reservoir computing against echo state networks.">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17202a;
+      --muted: #647084;
+      --line: #d9e0ea;
+      --paper: #f7f8fb;
+      --panel: #ffffff;
+      --blue: #2f62b7;
+      --teal: #1f8a83;
+      --green: #2d7d46;
+      --amber: #b87513;
+      --red: #b94a48;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: var(--blue); text-decoration-thickness: 0.08em; text-underline-offset: 0.18em; }
+    .wrap { width: min(1160px, calc(100vw - 34px)); margin: 0 auto; }
+    header.site {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: rgba(247, 248, 251, 0.92);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      min-height: 62px;
+    }
+    .brand { font-weight: 850; letter-spacing: 0; color: var(--ink); text-decoration: none; }
+    .navlinks { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; font-size: 14px; }
+    .navlinks a { color: #344054; text-decoration: none; font-weight: 650; }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.98fr);
+      gap: 32px;
+      align-items: center;
+      padding: 58px 0 32px;
+    }
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(40px, 6vw, 72px);
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+    .lead {
+      margin: 18px 0 0;
+      color: #3f4a5e;
+      font-size: clamp(18px, 2.4vw, 24px);
+      max-width: 760px;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 7px;
+      background: var(--blue);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+    }
+    .button.secondary { background: #e7ecf4; color: #1d2a3d; }
+    .hero-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 18px 40px rgba(23, 32, 42, 0.08);
+      padding: 18px;
+    }
+    .priority {
+      border-left: 5px solid var(--teal);
+      border-radius: 8px;
+      background: #fbfcff;
+      padding: 14px 15px;
+      margin-bottom: 14px;
+    }
+    .priority .badge {
+      display: inline-flex;
+      padding: 6px 9px;
+      border-radius: 6px;
+      background: var(--teal);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .priority h2 { margin: 10px 0 4px; font-size: 23px; line-height: 1.15; }
+    .priority p { margin: 0; color: #3f4a5e; }
+    .mini-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .mini {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px;
+      min-height: 92px;
+    }
+    .mini span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .mini strong { display: block; margin-top: 8px; font-size: 27px; line-height: 1; }
+    section { padding: 34px 0; }
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    h2 { margin: 0; font-size: clamp(26px, 3.8vw, 42px); line-height: 1.05; }
+    .section-title p { margin: 0; max-width: 620px; color: var(--muted); }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 18px;
+    }
+    .card h3 { margin: 0 0 8px; font-size: 19px; line-height: 1.2; }
+    .card p { margin: 0; color: #445066; }
+    .stat {
+      display: grid;
+      gap: 6px;
+      border-top: 4px solid var(--blue);
+      min-height: 134px;
+    }
+    .stat strong { font-size: 32px; line-height: 1; }
+    .stat span { color: var(--muted); font-size: 14px; }
+    .figure {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 14px 32px rgba(23, 32, 42, 0.06);
+    }
+    .figure img { display: block; width: 100%; height: auto; }
+    .caption { padding: 12px 14px; color: #445066; font-size: 14px; border-top: 1px solid var(--line); }
+    .steps {
+      counter-reset: step;
+      display: grid;
+      gap: 12px;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .step:before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 850;
+    }
+    pre {
+      margin: 10px 0 0;
+      white-space: pre-wrap;
+      background: #111827;
+      color: #edf2f7;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 13px;
+      overflow: auto;
+    }
+    .markers {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .markers li {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px 13px;
+    }
+    .markers strong { display: block; margin-bottom: 3px; }
+    .notice {
+      border: 1px solid rgba(184, 117, 19, 0.35);
+      border-left: 5px solid var(--amber);
+      background: rgba(184, 117, 19, 0.08);
+      border-radius: 8px;
+      padding: 15px;
+      color: #593e15;
+    }
+    footer { padding: 26px 0 38px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 32px; }
+    @media (max-width: 880px) {
+      .hero, .grid2, .grid3 { grid-template-columns: 1fr; }
+      .mini-metrics { grid-template-columns: 1fr; }
+      nav { align-items: start; flex-direction: column; padding: 13px 0; }
+      .section-title { display: block; }
+      .section-title p { margin-top: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site">
+    <nav class="wrap">
+      <a class="brand" href="#top">QRC Regime Atlas</a>
+      <div class="navlinks">
+        <a href="#question">Question</a>
+        <a href="#results">Results</a>
+        <a href="#triage">Triage</a>
+        <a href="#figures">Figures</a>
+        <a href="#claims">Claims</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <div class="wrap hero">
+      <div>
+        <h1>Mapping Quantum Reservoir Advantage</h1>
+        <p class="lead">A dataset-regime benchmark for deciding when quantum reservoir computing is worth testing against echo state networks.</p>
+        <div class="actions">
+          <a class="button" href="#triage">Run the local analyzer</a>
+          <a class="button secondary" href="assets/mapping_quantum_reservoir_advantage.pdf">Download paper PDF</a>
+        </div>
+      </div>
+      <aside class="hero-card" aria-label="Example triage result">
+        <div class="priority">
+          <span class="badge">QRC worth testing</span>
+          <h2>Slow, stateful structure is the strongest current marker.</h2>
+          <p>The analyzer looks for drifting trends, persistent low-frequency dynamics, long memory, and structured volatility before recommending a QRC test.</p>
+        </div>
+        <div class="mini-metrics">
+          <div class="mini"><span>Expected gain</span><strong>+0.045</strong></div>
+          <div class="mini"><span>Priority score</span><strong>39%</strong></div>
+          <div class="mini"><span>Closest regime</span><strong>Trend</strong></div>
+        </div>
+      </aside>
+    </div>
+
+    <section id="question">
+      <div class="wrap">
+        <div class="section-title">
+          <h2>The practical question</h2>
+          <p>QRC is not treated as universally better. The benchmark asks where it is empirically worth testing under a frozen, fair protocol.</p>
+        </div>
+        <div class="grid3">
+          <article class="card">
+            <h3>Dataset first</h3>
+            <p>Every time series is summarized by 30 measured properties before the model decision is made.</p>
+          </article>
+          <article class="card">
+            <h3>Frozen comparison</h3>
+            <p>Three globally calibrated QRC variants are compared against a globally calibrated, feature-matched sparse leaky ESN.</p>
+          </article>
+          <article class="card">
+            <h3>Regime map</h3>
+            <p>The output is not a universal win claim. It is a map of where QRC evidence should be concentrated next.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="results">
+      <div class="wrap">
+        <div class="section-title">
+          <h2>Benchmark scale</h2>
+          <p>All headline numbers come from the v5 publication package and a held-out validation split.</p>
+        </div>
+        <div class="grid3">
+          <div class="card stat"><strong>50,000</strong><span>synthetic candidate datasets in the property atlas</span></div>
+          <div class="card stat"><strong>20,000</strong><span>labeled QRC-vs-ESN datasets, split into discovery and validation</span></div>
+          <div class="card stat"><strong>30</strong><span>fixed time-series descriptors used for the regime map</span></div>
+          <div class="card stat"><strong>16</strong><span>broad synthetic process families</span></div>
+          <div class="card stat"><strong>0.836</strong><span>validation ROC-AUC for predicting QRC-useful cases</span></div>
+          <div class="card stat"><strong>12.5%</strong><span>validation datasets where best QRC is clearly useful at the chosen threshold</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="triage">
+      <div class="wrap grid2">
+        <div>
+          <h2>Researcher triage tool</h2>
+          <p>The public site does not upload private time series to a hosted backend. Researchers run the analyzer locally, paste or upload a CSV in their browser, and get a plain-language QRC priority signal.</p>
+          <div class="notice">
+            A positive recommendation means "QRC is worth testing next." It does not prove quantum advantage on the submitted dataset.
+          </div>
+        </div>
+        <div class="card">
+          <div class="steps">
+            <div class="step">
+              <div>
+                <h3>Install the benchmark package</h3>
+                <pre>git clone https://github.com/eybmits/qrc-dataset-profiler.git
+cd qrc-dataset-profiler
+pip install -e ".[dev]"</pre>
+              </div>
+            </div>
+            <div class="step">
+              <div>
+                <h3>Start the local web analyzer</h3>
+                <pre>PYTHONPATH=src python -m qrc_dataset_profiler.run_triage_web --port 8765</pre>
+              </div>
+            </div>
+            <div class="step">
+              <div>
+                <h3>Open the local page</h3>
+                <pre>http://127.0.0.1:8765</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="figures">
+      <div class="wrap">
+        <div class="section-title">
+          <h2>Key figures</h2>
+          <p>The figures show all validation points, the discovery-trained validation model, and family-level QRC-usefulness structure.</p>
+        </div>
+        <div class="grid2">
+          <figure class="figure">
+            <img src="assets/figures/regime-map.png" alt="Validation regime map showing QRC advantage over ESN across dataset-property space.">
+            <figcaption class="caption">Validation regime map. Points are synthetic time-series datasets projected from the 30 measured descriptors.</figcaption>
+          </figure>
+          <figure class="figure">
+            <img src="assets/figures/meta-model-validation.png" alt="Meta-model validation plots including prediction, calibration, and feature importance.">
+            <figcaption class="caption">Discovery-trained meta-model validation. The model predicts held-out QRC-useful cases from measured properties.</figcaption>
+          </figure>
+          <figure class="figure">
+            <img src="assets/figures/family-effects.png" alt="Family-level QRC-usefulness rates and mean effects.">
+            <figcaption class="caption">Family effects. Drifting-trend, regime-switching, and colored-noise families have the clearest positive pockets.</figcaption>
+          </figure>
+          <article class="card">
+            <h3>Downloadable artifacts</h3>
+            <p>The paper PDF and summary table are bundled with this site for quick review.</p>
+            <div class="actions">
+              <a class="button" href="assets/mapping_quantum_reservoir_advantage.pdf">Paper PDF</a>
+              <a class="button secondary" href="assets/tables/v5_split_summary.csv">Split summary CSV</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="claims">
+      <div class="wrap grid2">
+        <div>
+          <h2>What the atlas says</h2>
+          <ul class="markers">
+            <li><strong>QRC is selective, not broadly dominant.</strong> ESN remains the stronger default on average.</li>
+            <li><strong>QRC-useful cases are structured.</strong> Useful pockets recur across discovery and validation splits.</li>
+            <li><strong>Slow, stateful forecasting is the clearest current marker.</strong> Drifting trends, regime changes, persistent low-frequency structure, long memory, and correlated fluctuations are the most interpretable high-priority region.</li>
+            <li><strong>Dataset-level triage is practical.</strong> Researchers can profile a new time series before spending effort on QRC evaluation.</li>
+          </ul>
+        </div>
+        <div>
+          <h2>What it does not claim</h2>
+          <ul class="markers">
+            <li><strong>No universal quantum advantage.</strong> The title uses "advantage" in the empirical benchmark sense: lower forecasting error under the declared frozen protocol.</li>
+            <li><strong>No mechanism proof yet.</strong> The atlas identifies where QRC helps; it does not prove whether the mechanism is coupling, dissipation, interference, or broader reservoir memory.</li>
+            <li><strong>No cloud diagnosis of private data.</strong> The public page documents the analyzer, but researchers run their CSV locally.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      Mapping Quantum Reservoir Advantage. Dataset-regime benchmark for QRC vs ESN. Last updated for the v5 atlas package.
+    </div>
+  </footer>
+</body>
+</html>
