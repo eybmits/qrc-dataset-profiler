@@ -7,6 +7,35 @@ The triage tool is a screening algorithm. It does not run QRC or ESN on the
 submitted dataset. It computes dataset descriptors, compares them with the
 atlas, and reports whether QRC is worth testing against the frozen ESN protocol.
 
+## Public Browser Analyzer
+
+The project website includes a static, globally accessible CSV analyzer:
+
+```text
+https://eybmits.github.io/qrc-dataset-profiler/#try
+```
+
+This version runs directly in the visitor's browser. The CSV is not uploaded to
+a server. It computes a compact set of JavaScript-friendly markers, loads
+`docs/assets/triage_model.json`, and reports a plain-language recommendation:
+
+- `QRC is worth testing`;
+- `QRC may be worth testing`;
+- `ESN is probably enough first`;
+- `Run a direct benchmark` when the series is too different from atlas support.
+
+The browser analyzer is intentionally lighter than the full Python triage stack.
+Its exported model is trained on the v5 discovery atlas using browser-computable
+features only. The asset records held-out validation quality; at export time the
+browser subset reached ROC-AUC 0.806 on the v5 validation split. Treat it as a
+fast screening tool for researchers, not as the paper-grade reference analysis.
+
+Regenerate the public browser model with:
+
+```bash
+python scripts/export_static_triage_model.py
+```
+
 ## Accepted CSV Shape
 
 The current triage CLI supports univariate forecasting datasets:
@@ -56,9 +85,10 @@ PYTHONPATH=src python -m qrc_dataset_profiler.run_triage \
   --out triage_report.json
 ```
 
-## Local Web Interface
+## Full Python Web Interface
 
-The same triage path is available as a local browser interface:
+The full 30-feature triage path is also available as a Python-backed browser
+interface:
 
 ```bash
 PYTHONPATH=src python -m qrc_dataset_profiler.run_triage_web --port 8765
@@ -70,9 +100,9 @@ Open:
 http://127.0.0.1:8765
 ```
 
-The webpage accepts the same univariate CSV shape as the CLI. It sends the CSV text to a
-local `/api/triage` endpoint, computes the 30 descriptors on the Python backend, and shows
-a plain-language QRC priority:
+This webpage accepts the same univariate CSV shape as the CLI. It sends the CSV
+text to a local `/api/triage` endpoint, computes the 30 descriptors on the
+Python backend, and shows a plain-language QRC priority:
 
 - whether QRC should be prioritized, tested if available, deprioritized, or benchmarked
   directly because the dataset is outside familiar atlas support;

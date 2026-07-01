@@ -35,6 +35,7 @@ Project website: `https://eybmits.github.io/qrc-dataset-profiler/`.
 - `src/qrc_dataset_profiler/run_frontier.py` - 30-feature frontier atlas, selection, and regime-map analysis.
 - `src/qrc_dataset_profiler/run_triage.py` - user-facing QRC-usefulness triage for a new CSV time series.
 - `src/qrc_dataset_profiler/run_triage_web.py` - local browser interface for the triage tool.
+- `scripts/export_static_triage_model.py` - export the lightweight browser-side triage model for GitHub Pages.
 - `src/qrc_dataset_profiler/frontier_plots.py` - prospective frontier publication figures.
 - `STATUS.md` - current evidence, artifact inventory, and claim boundaries.
 - `ROADMAP.md` - next planned analysis increment.
@@ -58,9 +59,9 @@ Project website: `https://eybmits.github.io/qrc-dataset-profiler/`.
   index in `results_v5_publication/`.
 - **Paper draft complete:** LaTeX source is under `paper/`; the compiled paper PDF is
   `paper/mapping_quantum_reservoir_advantage.pdf`.
-- **Triage tools complete:** `run_triage` and `run_triage_web` screen new univariate CSV
-  time series for likely QRC usefulness using the frozen discovery atlas and
-  atlas-support/OOD scoring.
+- **Triage tools complete:** the public website provides a lightweight browser-side
+  CSV analyzer; `run_triage` and `run_triage_web` remain the full Python reference
+  screeners using the frozen discovery atlas and atlas-support/OOD scoring.
 
 ## Dataset Counts
 
@@ -86,7 +87,8 @@ Project website: `https://eybmits.github.io/qrc-dataset-profiler/`.
   prospective-validation labels.
 - `results_v5_publication/` - v5 paper-facing tables, seven figure sets, report, and HTML.
 - `paper/` - executable IEEE-style LaTeX paper source and compiled PDF.
-- `docs/` - static researcher-facing GitHub Pages website.
+- `docs/` - static researcher-facing GitHub Pages website with browser-side CSV triage.
+- `docs/assets/triage_model.json` - compact exported atlas model for browser triage.
 - `TRIAGE.md` - public CSV contract and interpretation boundary for the triage tool.
 
 ## Quickstart
@@ -129,6 +131,16 @@ cp build/main.pdf mapping_quantum_reservoir_advantage.pdf
 ```
 
 QRC-usefulness triage for a new univariate time series:
+
+Public browser analyzer:
+
+```text
+https://eybmits.github.io/qrc-dataset-profiler/#try
+```
+
+This static web analyzer runs in the visitor's browser and does not upload the
+CSV. It uses a compact JavaScript-computable feature subset for fast screening.
+The Python command below is the reference triage path for paper-grade reporting.
 
 ```bash
 PYTHONPATH=src python -m qrc_dataset_profiler.run_triage \

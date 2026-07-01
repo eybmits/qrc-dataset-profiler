@@ -237,6 +237,190 @@
       font-size: 16px;
     }
 
+    .analyzer {
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #243044;
+      font-weight: 750;
+      font-size: 15px;
+    }
+
+    input[type="file"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      border: 1px solid #cfd6e0;
+      border-radius: 7px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    input[type="file"],
+    input[type="text"] {
+      min-height: 42px;
+      padding: 8px 10px;
+    }
+
+    textarea {
+      min-height: 170px;
+      padding: 12px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .analyzer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button.button {
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .result {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--accent);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .result[hidden] {
+      display: none;
+    }
+
+    .result.high {
+      border-left-color: var(--good);
+      background: #f6fbf8;
+    }
+
+    .result.worth,
+    .result.info {
+      border-left-color: var(--accent);
+      background: #f7faff;
+    }
+
+    .result.low {
+      border-left-color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    .result.ood {
+      border-left-color: var(--warn);
+      background: #fff8eb;
+    }
+
+    .result-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .result-badge {
+      display: inline-flex;
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: var(--ink);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .score-row div,
+    .marker {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #ffffff;
+    }
+
+    .score-row strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .score-row span,
+    .marker span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .marker-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .marker.active {
+      border-color: rgba(35, 122, 87, 0.45);
+      background: #f2fbf6;
+    }
+
+    details {
+      margin-top: 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 12px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .boundary {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
     footer {
       padding: 28px 0 40px;
       color: var(--muted);
@@ -250,6 +434,14 @@
       .actions { display: grid; }
       .button { width: 100%; }
       .step { grid-template-columns: 1fr; }
+      .field-row,
+      .score-row,
+      .marker-grid {
+        grid-template-columns: 1fr;
+      }
+      .analyzer-actions {
+        display: grid;
+      }
     }
   </style>
 </head>
@@ -263,7 +455,7 @@
         The answer is simple: not everywhere, but in specific slow and stateful regimes.
       </p>
       <div class="actions">
-        <a class="button" href="#try">Test your own CSV locally</a>
+        <a class="button" href="#try">Analyze your CSV now</a>
         <a class="button secondary" href="assets/mapping_quantum_reservoir_advantage.pdf">Read the paper draft</a>
       </div>
     </div>
@@ -356,42 +548,39 @@
 
     <section id="try">
       <div class="wrap">
-        <h2>Test your own time series</h2>
+        <h2>Analyze your own time series</h2>
         <p>
-          The analyzer runs on your computer. Your CSV is not uploaded to this website.
-          Use one column of numbers, or a CSV where one numeric column contains the target time series.
+          This runs directly in the page. Choose or paste a CSV, and the browser computes a fast QRC triage score.
+          The file is not uploaded to a server.
         </p>
 
-        <div class="steps">
-          <div class="step">
-            <div class="number">1</div>
-            <div>
-              <h3>Install</h3>
-              <pre>git clone https://github.com/eybmits/qrc-dataset-profiler.git
-cd qrc-dataset-profiler
-pip install -e ".[dev]"</pre>
-            </div>
+        <div class="analyzer" aria-label="Browser QRC triage analyzer">
+          <div class="field-row">
+            <label>
+              CSV file
+              <input id="csvFile" type="file" accept=".csv,.txt,.tsv,text/csv,text/plain">
+            </label>
+            <label>
+              Target column
+              <input id="columnName" type="text" placeholder="auto, value, target, 0">
+            </label>
           </div>
 
-          <div class="step">
-            <div class="number">2</div>
-            <div>
-              <h3>Start the local analyzer</h3>
-              <pre>PYTHONPATH=src python -m qrc_dataset_profiler.run_triage_web --port 8765</pre>
-            </div>
+          <label>
+            Or paste CSV values
+            <textarea id="csvText" spellcheck="false" placeholder="value&#10;1.02&#10;1.08&#10;1.05&#10;1.11"></textarea>
+          </label>
+
+          <div class="analyzer-actions">
+            <button id="analyzeButton" class="button" type="button">Analyze dataset</button>
+            <button id="demoButton" class="button secondary" type="button">Try example</button>
           </div>
 
-          <div class="step">
-            <div class="number">3</div>
-            <div>
-              <h3>Open it in your browser</h3>
-              <pre>http://127.0.0.1:8765</pre>
-            </div>
-          </div>
+          <div id="resultPanel" class="result info" role="status"></div>
         </div>
 
         <p class="note">
-          A positive result means "QRC is worth testing against ESN." It does not prove a quantum advantage on that dataset.
+          The website uses a lightweight browser model trained on atlas markers. The full reproducible Python tool remains the reference analysis for paper-grade reporting.
         </p>
       </div>
     </section>
@@ -415,5 +604,6 @@ pip install -e ".[dev]"</pre>
       QRC Advantage Atlas. A dataset-regime benchmark for quantum reservoir computing against echo state networks.
     </div>
   </footer>
+  <script src="assets/triage.js"></script>
 </body>
 </html>
