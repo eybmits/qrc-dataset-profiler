@@ -1,20 +1,23 @@
 # qrc_dataset_profiler
 
 Unified protocol to characterize univariate time-series datasets with the same schema,
-evaluate a fixed Standard-Spin v1 quantum reservoir against classical baselines, and
-learn a meta-model that categorizes when QRC is especially useful.
+compare canonical frozen spin-QRC variants against a feature-matched frozen ESN, and
+learn a regime map that categorizes when QRC is especially worth testing.
 
-The current result is useful but intentionally conservative: the 1000-dataset sweep and
-meta-model show a robust property-to-advantage signal, including anti-circularity checks.
-The goal is not to prove a fundamental quantum advantage. Quantum-attribution checks are
-included as controls so the dataset-categorization claim stays bounded and defensible.
+The current paper-facing result is a v5 regime atlas: 50,000 synthetic property
+candidates, a frozen target-free 20,000-row labeled discovery/validation subset,
+three globally calibrated QRC variants, and a feature-matched frozen sparse ESN. The
+goal is not to prove fundamental quantum advantage. The supported claim is conditional:
+dataset properties identify regimes where QRC is worth testing against a strong ESN
+baseline.
 
 ## Repository Map
 
 - `PROTOCOL.md` - frozen protocol contract and schema semantics.
-- `COMPARISON_PROTOCOL.md` - frozen publication-facing model comparison protocol v3.
-- `FRONTIER_PROTOCOL.md` - 20k-property / 5k+5k evaluated frontier atlas plan.
-- `NPJ_FRONTIER_PROTOCOL.md` - next 50k-candidate support-aware NPJ frontier protocol.
+- `TRIAGE.md` - CSV input contract and user-facing QRC-usefulness triage guide.
+- `COMPARISON_PROTOCOL.md` - historical frozen model comparison protocol v3.
+- `FRONTIER_PROTOCOL.md` - earlier frontier atlas plan and selection machinery.
+- `NPJ_FRONTIER_PROTOCOL.md` - 50k-candidate support-aware frontier protocol.
 - `src/qrc_dataset_profiler/spec.py` - machine-readable schema definitions.
 - `src/qrc_dataset_profiler/run_profile.py` - profile the initial catalog.
 - `src/qrc_dataset_profiler/run_study.py` - build Block E baseline/QRC targets.
@@ -28,6 +31,7 @@ included as controls so the dataset-categorization claim stays bounded and defen
 - `src/qrc_dataset_profiler/run_visual_suite.py` - state-of-the-art visual suite and HTML index.
 - `src/qrc_dataset_profiler/run_scientific_plots.py` - dense publication-style multi-panel figures.
 - `src/qrc_dataset_profiler/run_frontier.py` - 30-feature frontier atlas, selection, and regime-map analysis.
+- `src/qrc_dataset_profiler/run_triage.py` - user-facing QRC-usefulness triage for a new CSV time series.
 - `src/qrc_dataset_profiler/frontier_plots.py` - prospective frontier publication figures.
 - `STATUS.md` - current evidence, artifact inventory, and claim boundaries.
 - `ROADMAP.md` - next planned analysis increment.
@@ -43,113 +47,104 @@ included as controls so the dataset-categorization claim stays bounded and defen
 - **Increment 4 complete:** paper-grade analysis suite, formal anti-circularity reports,
   reviewer figures, and corrected paired J=1 vs J=0 attribution are implemented. The
   corrected attribution result is mixed/null overall, so no coupling mechanism claim is made.
-- **Increment 5 complete:** 50 named benchmark datasets, 1000-row sweep/atlas, and a
-  deterministic 24-feature Tier-B descriptor table.
-- **Visual package complete:** ten state-of-the-art PNG/PDF figures, an HTML index,
-  and a concise visual report in `results_visuals/`.
-- **Scientific figure package complete:** five dense multi-panel publication figures in
-  `results_scientific_plots/`.
-- **Synthetic-primary catalog fixed:** Santa Fe laser is now external validation only;
-  the primary 50-entry catalog and default 1000-row sweep are synthetic-only.
-- **Comparison protocol v3 frozen:** the paper-facing standard comparison is now symmetric:
-  QRC and ESN are each calibrated once on held-out calibration datasets, then frozen for
-  the atlas. The previous v2 comparison remains a conservative stress test with a
-  validation-tuned ESN.
-- **Primary feature contract v2 frozen:** the explanatory meta-model uses 20 predefined
-  measured dataset properties, adding sample entropy and Hurst R/S to the previous core axes.
-- **Frontier protocol v3.1 evaluated:** the paper-title target is now “A Regime Map of
-  Conditional Quantum Reservoir Advantage.” The frontier workflow has a completed 20,000-row
-  synthetic property-only atlas, 30 fixed Tier-A features, and a completed target-free
-  5,000-row discovery plus 5,000-row prospective-validation evaluated atlas under frozen
-  `standard_v3`.
-- **Frontier publication figures complete:** four PNG/PDF frontier figures, prospective
-  predictions, metrics, report, and `index.html` are in `results_frontier_publication/`.
-- **NPJ frontier protocol drafted:** `NPJ_FRONTIER_PROTOCOL.md` defines the next
-  support-aware v4 atlas: 16 broad process families plus perturbation axes, 50,000
-  synthetic property candidates, 20,000 evaluated labels as the recommended paper run,
-  optional 50,000-label stress run, real-world external probes, OOD support scoring, and
-  rule/feature stability testing.
+- **v5 calibration complete:** QRC-M, QRC-E, QRC-D, and the sparse leaky ESN are calibrated
+  once on 320 held-out synthetic calibration rows and then frozen globally.
+- **v5 atlas complete:** 50,000 synthetic property candidates, 20,000 target-free selected
+  labels, split into 10,000 discovery and 10,000 prospective-validation rows.
+- **v5 publication package complete:** seven PNG/PDF figure sets, tables, report, and HTML
+  index in `results_v5_publication/`.
+- **Paper draft complete:** LaTeX source is under `paper/`; the compiled paper PDF is
+  `paper/mapping_quantum_reservoir_advantage.pdf`.
+- **Triage CLI complete:** `run_triage` screens new univariate CSV time series for likely
+  QRC usefulness using the frozen discovery atlas and atlas-support/OOD scoring.
 
 ## Dataset Counts
 
-- Configured primary catalog: **50 synthetic rows** from the 50 nominal protocol entries.
-- Configured default sweep: **1000 synthetic parameterized rows** across 9 families.
-- External validation bridge: **40 Santa Fe laser real-data windows** are available via
-  `make_real_bridge_specs`, but are not part of the primary synthetic atlas.
-- Extended features: **1000 rows x 24 deterministic Tier-B features** in `results_features/`.
-- Corrected attribution control: **360 rows** from the expanded chaotic-flow and chaotic-map subset.
-- Frontier property atlas: **20,000 synthetic rows** from `n_per_template=400`.
-- Frontier evaluated atlas: **10,000 selected rows** split into 5,000 discovery and
-  5,000 prospective validation labels.
-- Frontier validation result: **955 / 5000** any QRC wins and **258 / 5000** useful rows
-  at `qrc_advantage >= 0.05`.
-- Discovery-trained prospective meta-model on validation: **R2 0.4930**, **ROC-AUC 0.8563**,
-  **PR-AUC 0.2302**.
+- Primary v5 property atlas: **50,000 synthetic rows** from 16 broad process families.
+- v5 labeled atlas: **20,000 rows**, split into **10,000 discovery** and **10,000
+  prospective validation** rows.
+- v5 feature contract: **30 Tier-A descriptors**.
+- v5 validation result: **3,239 / 10,000** any best-QRC wins and **1,253 / 10,000**
+  useful rows at `best_qrc_advantage_vs_esn >= 0.05`.
+- v5 validation meta-model: **R2 0.4072**, **ROC-AUC 0.8357**, **PR-AUC 0.4305**.
+- Full 50,000-row atlas shape: **45,500 forecasting rows** and **4,500 input-driven
+  memory rows**, all scalar (`n_channels = 1`).
 
 ## Key Local Artifacts
 
-- `results_full/full_catalog.csv` - 50-row first full catalog with Block E targets.
-- `results_sweep/sweep_catalog.csv` - 1000-row parameterized sweep catalog.
-- `results_features/extended_features_sweep.csv` - deterministic Tier-B feature bank.
-- `results_meta/importances.csv` - meta-model feature importances.
-- `results_meta/importance_bar.png` - importance visualization.
-- `results_meta/partial_dependence.png` - partial-dependence visualization.
-- `results_meta/quantum_ablation.csv` - ad-hoc J=1 vs J=0 ablation; currently a red flag.
-- `results_analysis/` - deterministic Increment-4 analysis tables and figures.
-- `results_atlas/` - QRC usefulness map, family category summaries, and atlas figures.
-- `results_publication/` - multi-panel PNG/PDF figures and concise atlas report.
-- `results_quantum_attribution/` - corrected paired J=1 vs J=0 attribution artifacts.
-- `results_visuals/` - ten-figure visual suite, `index.html`, and visual report.
-- `results_scientific_plots/` - five dense publication-style PNG/PDF multi-panel figures.
-- `results_frontier_property/` - 20,000-row synthetic property atlas.
-- `results_frontier_selection/` - frozen target-free discovery/validation selection.
-- `results_frontier_discovery/` - 5,000-row discovery labels.
-- `results_frontier_validation/` - 5,000-row validation labels and 50 checkpoint chunks.
-- `results_frontier_regime_discovery/` and `results_frontier_regime_validation/` - split
-  regime-map analyses.
-- `results_frontier_publication/` - frontier PNG/PDF figure package, metrics, report, and
-  HTML index.
-- `results_sweep_tiny/sweep_catalog.csv` - tiny sanity sweep output.
+- `results_calibration_v5/frozen_v5_config.json` - globally frozen QRC/ESN configuration.
+- `results_frontier_v4_property/frontier_property_atlas.csv` - 50,000-row property atlas.
+- `results_frontier_v4_selection/frontier_evaluation_selection.csv` - target-free 20,000-row
+  discovery/validation selection.
+- `results_frontier_v5_discovery/frontier_discovery_evaluated_v5_multi_qrc.csv` - 10,000
+  discovery labels.
+- `results_frontier_v5_validation/frontier_validation_evaluated_v5_multi_qrc.csv` - 10,000
+  prospective-validation labels.
+- `results_v5_publication/` - v5 paper-facing tables, seven figure sets, report, and HTML.
+- `paper/` - executable IEEE-style LaTeX paper source and compiled PDF.
+- `TRIAGE.md` - public CSV contract and interpretation boundary for the triage tool.
 
 ## Quickstart
+
+Install and run the fast repository checks:
 
 ```bash
 pip install -e ".[dev]"
 PYTHONPATH=src python -m pytest -q
-PYTHONPATH=src python -m qrc_dataset_profiler.run_profile --smoke --out results
-PYTHONPATH=src python -m qrc_dataset_profiler.run_calibration --fast --out results_calibration_v3
-PYTHONPATH=src python -m qrc_dataset_profiler.run_study --smoke --out results_full
-PYTHONPATH=src python -m qrc_dataset_profiler.run_study --sweep --fast --out results_sweep --calibration-config results_calibration_v3/frozen_config.json
-PYTHONPATH=src python -m qrc_dataset_profiler.run_extended_features --sweep --fast --out results_features
-PYTHONPATH=src python -m qrc_dataset_profiler.run_meta --catalog results_sweep/sweep_catalog.csv --out results_meta
-PYTHONPATH=src python -m qrc_dataset_profiler.run_analysis --catalog results_sweep/sweep_catalog.csv --out results_analysis
-PYTHONPATH=src python -m qrc_dataset_profiler.run_usefulness_map --catalog results_sweep/sweep_catalog.csv --out results_atlas
-PYTHONPATH=src python -m qrc_dataset_profiler.run_quantum_attribution --catalog results_sweep/sweep_catalog.csv --out results_quantum_attribution
-PYTHONPATH=src python -m qrc_dataset_profiler.run_publication_package --out results_publication
-PYTHONPATH=src python -m qrc_dataset_profiler.run_visual_suite --out results_visuals
-PYTHONPATH=src python -m qrc_dataset_profiler.run_scientific_plots --out results_scientific_plots
 ```
 
-`run_study` now defaults to `--comparison-protocol standard_v3`. Use
-`--comparison-protocol standard_v2` for the conservative validation-tuned ESN stress test,
-and `--comparison-protocol legacy_v1` only to reproduce earlier simple-cycle artifacts.
-
-Frontier regime-map workflow:
+Rebuild the paper-facing v5 analysis package from committed v5 labels:
 
 ```bash
-PYTHONPATH=src python -m qrc_dataset_profiler.run_frontier property-atlas --out results_frontier_property --n-per-template 400 --fast
-PYTHONPATH=src python -m qrc_dataset_profiler.run_frontier select --property-atlas results_frontier_property/frontier_property_atlas.csv --out results_frontier_selection --n-discovery 5000 --n-validation 5000
-PYTHONPATH=src python -m qrc_dataset_profiler.run_frontier evaluate-selection --selection results_frontier_selection/frontier_evaluation_selection.csv --out results_frontier_discovery --split discovery --comparison-protocol standard_v3 --calibration-config results_calibration_v3/frozen_config.json --fast --seeds 3 --checkpoint-every 100
-PYTHONPATH=src python -m qrc_dataset_profiler.run_frontier evaluate-selection --selection results_frontier_selection/frontier_evaluation_selection.csv --out results_frontier_validation --split validation --comparison-protocol standard_v3 --calibration-config results_calibration_v3/frozen_config.json --fast --seeds 3 --checkpoint-every 100
-PYTHONPATH=src python -m qrc_dataset_profiler.run_frontier analyze --evaluated-table results_frontier_discovery/frontier_discovery_evaluated_30_features.csv --out results_frontier_regime_discovery
-PYTHONPATH=src python -m qrc_dataset_profiler.run_frontier analyze --evaluated-table results_frontier_validation/frontier_validation_evaluated_30_features.csv --out results_frontier_regime_validation
-PYTHONPATH=src python -m qrc_dataset_profiler.run_frontier plot --out results_frontier_publication
+PYTHONPATH=src python -m qrc_dataset_profiler.run_v5_publication --out results_v5_publication
 ```
+
+Regenerate the full v5 atlas from scratch:
+
+```bash
+PYTHONPATH=src python -m qrc_dataset_profiler.run_frontier property-atlas --taxonomy v4 --out results_frontier_v4_property --n-per-template 500 --fast --checkpoint-every 100
+PYTHONPATH=src python -m qrc_dataset_profiler.run_frontier select --property-atlas results_frontier_v4_property/frontier_property_atlas.csv --out results_frontier_v4_selection --n-discovery 10000 --n-validation 10000 --selection-protocol v4
+PYTHONPATH=src python -m qrc_dataset_profiler.run_v5_protocol calibrate --out results_calibration_v5 --fast
+PYTHONPATH=src python -m qrc_dataset_profiler.run_v5_protocol evaluate-selection --selection results_frontier_v4_selection/frontier_evaluation_selection.csv --calibration-config results_calibration_v5/frozen_v5_config.json --out results_frontier_v5_discovery --split discovery --fast --seeds 1 --checkpoint-every 100
+PYTHONPATH=src python -m qrc_dataset_profiler.run_v5_protocol evaluate-selection --selection results_frontier_v4_selection/frontier_evaluation_selection.csv --calibration-config results_calibration_v5/frozen_v5_config.json --out results_frontier_v5_validation --split validation --fast --seeds 1 --checkpoint-every 100
+PYTHONPATH=src python -m qrc_dataset_profiler.run_v5_publication --out results_v5_publication
+```
+
+Earlier increment workflows remain reproducible. `run_study` defaults to
+`--comparison-protocol standard_v3`; use `standard_v2` for the conservative
+validation-tuned ESN stress test, and `legacy_v1` only to reproduce early
+simple-cycle artifacts.
+
+Rebuild the LaTeX paper:
+
+```bash
+cd paper
+latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build main.tex
+cp build/main.pdf mapping_quantum_reservoir_advantage.pdf
+```
+
+QRC-usefulness triage for a new univariate time series:
+
+```bash
+PYTHONPATH=src python -m qrc_dataset_profiler.run_triage \
+  --series path/to/my_series.csv \
+  --column value \
+  --name my_dataset
+```
+
+The triage command does not run QRC or ESN on the submitted dataset. It computes the
+30 atlas descriptors, fits the lightweight discovery-only meta-model from
+`results_frontier_v5_discovery/frontier_discovery_evaluated_v5_multi_qrc.csv`, adds an
+atlas-support/OOD score, and reports whether QRC is worth testing against the frozen ESN.
+Use `--format json --out triage_report.json` for a machine-readable report. See
+`TRIAGE.md` for the CSV contract, atlas-shape notes, and interpretation boundary.
 
 ## Claim Boundary
 
-The current evidence supports the claim that dataset properties can predict when a fixed
-Spin-QRC implementation is relatively useful under the tested frozen `standard_v3`
-protocol. The frontier evidence supports a conditional regime-map claim inside the synthetic
-atlas, with moderate base-generator generalization and weak family-held-out generalization.
-No version claims a broad average QRC win or a coupling/entanglement mechanism.
+The current evidence supports a protocol-local regime-map claim: under globally frozen
+canonical QRC variants and a globally frozen feature-matched sparse ESN, dataset properties
+predict when QRC is worth testing. The strongest empirical QRC-usefulness regime is slow,
+stateful forecasting: drifting trends, regime changes, persistent low-frequency structure,
+long memory, and temporally correlated fluctuations. The project does not claim broad
+average QRC superiority, computational quantum advantage, or a proven coupling/entanglement
+mechanism.

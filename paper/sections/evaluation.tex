@@ -1,4 +1,4 @@
-The evaluation is organized around the five paper claims: selectivity, predictability, slow-stateful regimes, interacting descriptors, and dataset-level triage.
+The evaluation is organized around five paper claims: selective advantage, property-based triage, the strongest slow-stateful QRC regime, mechanism-resolved QRC variants, and robustness of the regime map.
 
 \begin{figure*}[!t]
     \centering
@@ -65,7 +65,7 @@ The discovery-trained meta-model predicts validation advantage with \(R^2=0.407\
 
 The important descriptors are not a single axis. Top features include GBM predictability, scaling exponent, predictability-gap structure, spectral centroid, volatility autocorrelation, trend strength, nonlinear-gain contrast, Lyapunov estimate, spectral slope, autocorrelation time, stationarity signal, and SNR. The signs are mixed because the map is interaction-driven: the same descriptor can be favorable in one region and unfavorable in another.
 
-\subsection{Slow, stateful regimes are most favorable}
+\subsection{The strongest QRC-usefulness regime is slow and stateful}
 
 \begin{figure}[!t]
     \centering
@@ -74,7 +74,7 @@ The important descriptors are not a single axis. Top features include GBM predic
     \label{fig:family-effects}
 \end{figure}
 
-\autoref{fig:family-effects} and \autoref{tab:family-top} summarize the family-level structure. The strongest family is the drifting-trend family, with 47.9\% useful rate, 51.8\% win rate, and mean advantage \(+0.240\) with 95\% bootstrap interval \([+0.203,+0.282]\). Regime switching and colored noise also have positive mean effects and useful rates above 23\%. Intermittent sparse and linear stochastic families have high win rates but small mean effects, indicating many near-ties rather than large QRC gains.
+\autoref{fig:family-effects} and \autoref{tab:family-top} summarize the family-level structure. The strongest and most likely QRC-usefulness case in the current atlas is the drifting-trend family, with 47.9\% useful rate, 51.8\% win rate, and mean advantage \(+0.240\) with 95\% bootstrap interval \([+0.203,+0.282]\). Regime switching and colored noise also have positive mean effects and useful rates above 23\%. Intermittent sparse and linear stochastic families have high win rates but small mean effects, indicating many near-ties rather than large QRC gains.
 
 \begin{table}[!t]
 \centering
@@ -99,11 +99,11 @@ Chaotic map & 2056 & 10.6 & 28.5 & -0.072 \\
 \end{tabular}
 \end{table}
 
-The strongest extracted validation rule pocket is also interpretable. Rows with high trend strength and low spectral centroid form a pocket of 420 validation datasets with 47.4\% useful rate and mean advantage \(+0.209\). This is not a mechanism proof. It is a compact triage rule: slow, trend-heavy, low-frequency structure is a high-priority region for testing QRC.
+The strongest extracted validation rule pocket is also interpretable. Rows with high trend strength and low spectral centroid form a pocket of 420 validation datasets with 47.4\% useful rate and mean advantage \(+0.209\). This is not a mechanism proof. It is the paper's clearest empirical triage rule: slow, trend-heavy, low-frequency structure is the highest-priority region for testing QRC against the frozen ESN.
 
 \subsection{The map is robust to feature choices}
 
-The feature-set robustness table supports the anti-circularity claim. The full 30-feature map reaches validation ROC-AUC 0.836 and PR-AUC 0.431. Using only the original 20 core descriptors gives ROC-AUC 0.828 and PR-AUC 0.423. Removing direct predictability proxies gives ROC-AUC 0.834 and PR-AUC 0.432. Restricting to persistence, spectrum, volatility, and nonstationarity gives ROC-AUC 0.827 and PR-AUC 0.409. Thus the atlas is not simply rediscovering which baseline already won.
+The feature-set robustness table supports the regime-map interpretation. The full 30-feature map reaches validation ROC-AUC 0.836 and PR-AUC 0.431. Using only the original 20 core descriptors gives ROC-AUC 0.828 and PR-AUC 0.423. Removing direct predictability proxies gives ROC-AUC 0.834 and PR-AUC 0.432. Restricting to persistence, spectrum, volatility, and nonstationarity gives ROC-AUC 0.827 and PR-AUC 0.409. Thus the slow-stateful signal is not tied to one descriptor family.
 
 \begin{table}[!t]
 \centering

@@ -2,19 +2,16 @@
 
 Goal: a **unified, scientifically justified protocol** that characterizes *any* univariate
 real-valued time series with the **same fields**, so arbitrarily many datasets (synthetic
-*and* real) flow into one growable catalog. We then test a fixed **Standard-Spin v1**
-quantum reservoir against classical baselines on each dataset and learn which dataset
-properties explain when Spin-QRC wins.
+*and* real) flow into one growable catalog. These measured properties then support
+protocol-local comparisons between frozen QRC variants and matched classical reservoirs.
 
 This file is the **schema and dataset contract**. `src/qrc_dataset_profiler/spec.py` is its
 machine-readable form. Do **not** silently change field names or semantics — add fields and
 bump `SCHEMA_VERSION`.
 
-The publication-facing QRC-vs-classical comparison is now frozen separately in
-`COMPARISON_PROTOCOL.md` as **Frozen Comparison Protocol v3**. Current legacy/v2 artifacts
-were generated before that symmetric v3 freeze; rerun the atlas with
-`--comparison-protocol standard_v3` and a held-out calibration config before making
-standard-comparison paper claims.
+The current paper-facing comparison is the v5 multi-QRC atlas documented in
+`README.md`, `STATUS.md`, `REPRODUCIBILITY.md`, and `paper/`. Earlier v1-v3 comparison
+protocols remain documented for artifact lineage and historical reproduction only.
 
 ---
 
@@ -33,6 +30,17 @@ the **Tier-B backstop** (`catch22` + `tsfeatures`), computed wholesale as a comp
 - For `task_type="forecast"`: memory/linearity/nonlinearity/difficulty estimated from **past observations**. For `task_type="input_driven"`: from **past inputs u** (property of the u→y map). Same columns, task-dependent source.
 - NaN policy: ground-truth block = `NaN` for real data; `mem_capacity` = `NaN` unless input-driven.
 - Determinism: every generator + estimator is seeded.
+
+## 2.1 Task-shape contract for triage and atlas rows
+The atlas is scalar at the channel level. In the 50,000-row v4 candidate atlas,
+all rows have `n_channels = 1`; 45,500 rows are ordinary forecasting tasks with
+one ordered scalar series, and 4,500 rows are input-driven memory tasks with a
+scalar input `u[t]` and scalar target `y[t]`.
+
+The public triage CLI currently exposes the forecasting case only. A user CSV
+should contain one numeric target column, ordered from oldest to newest, with
+optional timestamp columns ignored by the tool. See `TRIAGE.md` for accepted CSV
+examples, default windowing, OOD/support scoring, and interpretation boundaries.
 
 ## 3. The 50 datasets (first catalog)
 Synthetic unless marked. Each synthetic generator must expose ground truth where known.
@@ -118,11 +126,11 @@ All groups → columns of one row. See `spec.py` for exact names/defaults.
 
 ## 4.1 Frontier Feature Tiers
 
-The 1000-row v3 atlas uses the 20 schema-v2 core fields as the primary explanatory
-feature set. The planned frontier atlas upgrades the headline feature set to **30 Tier-A
-features**: the 20 core fields plus 10 predeclared additions that are universal,
-interpretable, and directly relevant to reservoir usefulness. These are frozen before the
-frontier run and must not be selected after seeing frontier QRC outcomes.
+The 1000-row v3 atlas used the 20 schema-v2 core fields as the primary explanatory
+feature set. The paper-facing v5 atlas uses **30 Tier-A features**: the 20 core fields
+plus 10 predeclared additions that are universal, interpretable, and directly relevant to
+reservoir usefulness. These were frozen before the v5 QRC/ESN labels were evaluated and
+must not be selected after seeing QRC outcomes.
 
 **Tier-A core fields (20):** `ac_timescale`, `ami_first_min`, `mem_capacity`, `r2_linear`,
 `nl_gain`, `snr_db`, `lyapunov`, `zero_one_K`, `spectral_entropy`, `dom_freq`,
@@ -168,9 +176,10 @@ Baselines per dataset: linear/Ridge (AR), **dim-matched leaky ESN** (key control
 
 Legacy note: Increment 2-5 artifacts used the original Standard-Spin v1 path with input
 injection plus per-layer RZ reuploading and a dimension-matched simple-cycle ESN. The
-frozen publication comparison v3 changes the primary comparison to held-out calibrated
-fixed QRC versus held-out calibrated fixed sparse random leaky ESN, both with the same
-ridge readout protocol. See `COMPARISON_PROTOCOL.md`.
+current v5 paper comparison supersedes that path with three globally calibrated frozen QRC
+variants (mechanistic, encoding-enhanced, dissipative) versus a globally calibrated frozen
+sparse random leaky ESN, all with the same feature dimension and ridge readout protocol.
+See `results_calibration_v5/frozen_v5_config.json` and `REPRODUCIBILITY.md`.
 
 ## 6. Increments
 - **Increment 1:** package + initial 20 generators (Block D ground truth) + schema-v1
