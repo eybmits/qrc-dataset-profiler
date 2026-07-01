@@ -72,8 +72,15 @@ http://127.0.0.1:8765
 
 The webpage accepts the same univariate CSV shape as the CLI. It sends the CSV text to a
 local `/api/triage` endpoint, computes the 30 descriptors on the Python backend, and shows
-the recommendation, predicted advantage, useful probability, atlas-support score, nearest
-atlas families, and key descriptor percentiles.
+a plain-language QRC priority:
+
+- whether QRC should be prioritized, tested if available, deprioritized, or benchmarked
+  directly because the dataset is outside familiar atlas support;
+- the expected QRC error change versus ESN;
+- a QRC-priority score;
+- similarity to known atlas examples;
+- simple markers such as drifting trend, slow low-frequency structure, persistence, long
+  autocorrelation, and volatility memory.
 
 ## Data Assumptions
 

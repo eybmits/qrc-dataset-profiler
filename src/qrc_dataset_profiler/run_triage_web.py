@@ -393,6 +393,12 @@ def _html_page() -> str:
       font-weight: 800;
       letter-spacing: 0;
     }
+    .metric .meaning {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
     .section {
       margin-top: 16px;
       padding-top: 14px;
@@ -402,6 +408,44 @@ def _html_page() -> str:
       margin: 0 0 10px;
       font-size: 15px;
     }
+    .callout {
+      margin: 0 0 16px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--blue);
+      border-radius: 8px;
+      padding: 13px 14px;
+      background: #fbfcff;
+    }
+    .callout.high { border-left-color: var(--green); }
+    .callout.worth { border-left-color: var(--teal); }
+    .callout.low { border-left-color: var(--amber); }
+    .callout.ood { border-left-color: var(--red); }
+    .callout h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+    .callout p {
+      margin: 6px 0 0;
+      color: #344054;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .markers {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .markers li {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 9px 10px;
+      font-size: 13px;
+      line-height: 1.35;
+      background: #fff;
+    }
+    .markers strong { color: var(--ink); }
     .feature {
       display: grid;
       grid-template-columns: minmax(130px, 170px) 1fr minmax(62px, max-content);
@@ -409,6 +453,10 @@ def _html_page() -> str:
       align-items: center;
       margin: 8px 0;
       font-size: 13px;
+    }
+    .feature .hint {
+      color: var(--muted);
+      font-size: 12px;
     }
     .bar {
       height: 10px;
@@ -436,6 +484,17 @@ def _html_page() -> str:
       font-size: 12px;
       line-height: 1.45;
     }
+    details {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fff;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: 750;
+      font-size: 14px;
+    }
     .error {
       border: 1px solid rgba(185, 74, 72, 0.35);
       background: rgba(185, 74, 72, 0.08);
@@ -461,7 +520,7 @@ def _html_page() -> str:
   <header>
     <div>
       <h1>QRC Regime Triage</h1>
-      <p class="sub">Screen a univariate time series against the frozen v5 QRC-vs-ESN atlas.</p>
+      <p class="sub">Upload a time series and get a plain-language priority signal: should QRC be tested, or is ESN the better default?</p>
     </div>
   </header>
 
@@ -507,16 +566,16 @@ def _html_page() -> str:
           Header row
         </label>
         <div class="actions">
-          <button id="runButton" type="submit">Run Triage</button>
+          <button id="runButton" type="submit">Check QRC Priority</button>
           <button id="demoButton" class="secondary" type="button">Load Demo</button>
           <button id="clearButton" class="secondary" type="button">Clear</button>
         </div>
-        <p class="small">The tool computes descriptors and a triage score. It does not run QRC or ESN on the uploaded series.</p>
+        <p class="small">The tool looks for dataset markers that were associated with QRC gains in the atlas. It does not prove that QRC will win.</p>
       </form>
     </section>
 
     <section class="panel result" id="resultPanel">
-      <div class="empty">Run a dataset to see the recommendation, atlas support, and descriptor position.</div>
+      <div class="empty">Run a dataset to see whether QRC should be prioritized and which markers support that decision.</div>
     </section>
   </div>
 </main>
@@ -559,7 +618,7 @@ document.getElementById("clearButton").addEventListener("click", () => {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   runButton.disabled = true;
-  resultPanel.innerHTML = '<div class="empty">Computing descriptors and atlas support...</div>';
+  resultPanel.innerHTML = '<div class="empty">Checking QRC markers and similarity to known examples...</div>';
   const payload = {
     csv_text: csvText.value,
     column: document.getElementById("columnInput").value,
@@ -592,43 +651,129 @@ function renderReport(report) {
   const features = report.key_features || {};
   const rec = pred.recommendation || "unknown";
   const badgeClass = rec.includes("high") ? "high" : rec.includes("worth") ? "worth" : rec.includes("outside") ? "ood" : "low";
+  const recInfo = recommendationInfo(rec);
+  const markers = buildMarkers(features, pred, support);
   const featureRows = Object.entries(features).map(([name, payload]) => {
     const pct = Math.max(0, Math.min(1, Number(payload.atlas_percentile || 0)));
     return `<div class="feature">
-      <div>${formatFeatureName(name)}</div>
+      <div><strong>${formatFeatureName(name)}</strong><div class="hint">${featureMeaning(name, pct)}</div></div>
       <div class="bar"><span style="width:${(pct * 100).toFixed(1)}%"></span></div>
-      <div>${(pct * 100).toFixed(0)}%</div>
+      <div>${percentileLabel(pct)}</div>
     </div>`;
   }).join("");
   resultPanel.innerHTML = `
     <div class="statusbar">
       <div>
-        <div class="badge ${badgeClass}">${escapeHtml(rec.replaceAll("_", " "))}</div>
-        <div class="small" style="margin-top:8px">${escapeHtml(report.name || "dataset")}</div>
+        <div class="badge ${badgeClass}">${escapeHtml(recInfo.badge)}</div>
+        <div class="small" style="margin-top:8px">${escapeHtml(report.name || "dataset")} · ${escapeHtml(recInfo.action)}</div>
       </div>
       <div class="small">${escapeHtml((report.dataset && report.dataset.used_length) ? String(report.dataset.used_length) : "?")} samples used</div>
     </div>
+    <div class="callout ${badgeClass}">
+      <h3>${escapeHtml(recInfo.title)}</h3>
+      <p>${escapeHtml(recInfo.body)}</p>
+    </div>
     <div class="metricgrid">
-      <div class="metric"><div class="label">Predicted advantage</div><div class="value">${formatSigned(pred.predicted_best_qrc_advantage_vs_esn)}</div></div>
-      <div class="metric"><div class="label">Useful probability</div><div class="value">${formatPct(pred.qrc_useful_probability)}</div></div>
-      <div class="metric"><div class="label">Atlas support</div><div class="value">${formatPct(support.support_score)}</div></div>
+      <div class="metric"><div class="label">Expected QRC gain</div><div class="value">${formatSigned(pred.predicted_best_qrc_advantage_vs_esn)}</div><div class="meaning">Positive means the model expects QRC to reduce error versus ESN.</div></div>
+      <div class="metric"><div class="label">QRC priority score</div><div class="value">${formatPct(pred.qrc_useful_probability)}</div><div class="meaning">Higher means stronger evidence that this is a QRC-worthy regime.</div></div>
+      <div class="metric"><div class="label">Similarity to known cases</div><div class="value">${formatPct(support.support_score)}</div><div class="meaning">Low similarity means the tool should not be trusted without direct benchmarking.</div></div>
     </div>
     <div class="section">
-      <h3>Nearest atlas families</h3>
-      <p class="small">${escapeHtml(support.nearest_family_mixture || "not available")} ${support.ood_flag ? "(OOD)" : ""}</p>
+      <h3>Markers for QRC advantage</h3>
+      <ul class="markers">${markers.map(m => `<li><strong>${escapeHtml(m.title)}</strong><br>${escapeHtml(m.body)}</li>`).join("")}</ul>
     </div>
     <div class="section">
-      <h3>Descriptor position</h3>
+      <h3>Looks most like</h3>
+      <p class="small">${escapeHtml(formatFamilies(support.nearest_family_mixture) || "not available")} ${support.ood_flag ? "This is outside the familiar atlas region, so direct benchmarking is safer." : ""}</p>
+    </div>
+    <div class="section">
+      <h3>Dataset marker positions</h3>
       ${featureRows || '<p class="small">No key descriptor percentiles available.</p>'}
     </div>
     <div class="section">
-      <h3>Boundary</h3>
+      <h3>Important boundary</h3>
       <p class="small">${escapeHtml(report.claim_boundary || "")}</p>
     </div>
     <div class="section">
-      <h3>Text report</h3>
-      <pre>${escapeHtml(report.text_report || "")}</pre>
+      <details>
+        <summary>Show technical report</summary>
+        <pre>${escapeHtml(report.text_report || "")}</pre>
+      </details>
     </div>`;
+}
+
+function recommendationInfo(rec) {
+  if (rec === "high_priority_qrc_test") {
+    return {
+      badge: "High QRC priority",
+      title: "Test QRC for this dataset.",
+      body: "The dataset matches patterns where QRC was often useful against the frozen ESN baseline.",
+      action: "Run the QRC-vs-ESN benchmark next"
+    };
+  }
+  if (rec === "worth_testing_qrc_if_available") {
+    return {
+      badge: "QRC worth testing",
+      title: "QRC is plausible, but not guaranteed.",
+      body: "The dataset has some markers seen in QRC-favorable regimes. ESN remains a strong default, but QRC is worth a direct test.",
+      action: "Benchmark QRC if available"
+    };
+  }
+  if (rec === "outside_atlas_support__run_direct_benchmark") {
+    return {
+      badge: "Benchmark directly",
+      title: "This dataset is too different from the atlas.",
+      body: "The tool found low similarity to known atlas examples. Do not rely on the prediction alone; run ESN and QRC directly.",
+      action: "Do not trust the score alone"
+    };
+  }
+  return {
+    badge: "ESN first",
+    title: "QRC is low priority for this dataset.",
+    body: "The atlas suggests that a standard ESN is the better first model unless you have another scientific reason to test QRC.",
+    action: "Use ESN as the default"
+  };
+}
+
+function buildMarkers(features, pred, support) {
+  const markers = [];
+  const trend = percentileOf(features.ext_trend_strength);
+  const centroid = percentileOf(features.ext_spectral_centroid);
+  const persistence = percentileOf(features.dfa_alpha);
+  const memory = percentileOf(features.ac_timescale);
+  const vol = percentileOf(features.ext_volatility_ac1);
+  const gain = Number(pred.predicted_best_qrc_advantage_vs_esn);
+  if (Number.isFinite(gain) && gain > 0) {
+    markers.push({ title: "Positive expected QRC gain", body: "The learned map predicts lower error for QRC than for ESN on this dataset." });
+  }
+  if (trend !== null && trend >= 0.75) {
+    markers.push({ title: "Drifting or trend-like structure", body: "QRC-favorable atlas regions often involved slow changes in the level or state of the process." });
+  }
+  if (centroid !== null && centroid <= 0.30) {
+    markers.push({ title: "Slow low-frequency structure", body: "Important information appears to live in slow components rather than only recent jumps." });
+  }
+  if (persistence !== null && persistence >= 0.65) {
+    markers.push({ title: "Persistence / long memory", body: "The past appears to keep influencing the future over a longer horizon." });
+  }
+  if (memory !== null && memory >= 0.65) {
+    markers.push({ title: "Long autocorrelation time", body: "The series changes slowly enough that memory traces may matter." });
+  }
+  if (vol !== null && vol >= 0.65) {
+    markers.push({ title: "Volatility memory", body: "The size of fluctuations is itself temporally structured." });
+  }
+  if (support.ood_flag) {
+    markers.push({ title: "Outside familiar atlas support", body: "This weakens the recommendation; direct benchmarking is needed." });
+  }
+  if (markers.length === 0) {
+    markers.push({ title: "No strong QRC markers found", body: "The dataset does not clearly match the slow, stateful regimes where QRC was most useful." });
+  }
+  return markers;
+}
+
+function percentileOf(payload) {
+  if (!payload) return null;
+  const pct = Number(payload.atlas_percentile);
+  return Number.isFinite(pct) ? Math.max(0, Math.min(1, pct)) : null;
 }
 
 function formatPct(value) {
@@ -644,7 +789,54 @@ function formatSigned(value) {
 }
 
 function formatFeatureName(name) {
-  return name.replace(/^ext_/, "").replaceAll("_", " ");
+  const labels = {
+    ext_trend_strength: "Trend / drift strength",
+    ext_spectral_centroid: "Speed of dominant signal",
+    dfa_alpha: "Long-memory scaling",
+    ac_timescale: "Autocorrelation memory",
+    ext_volatility_ac1: "Volatility memory",
+    snr_db: "Signal clarity"
+  };
+  return labels[name] || name.replace(/^ext_/, "").replaceAll("_", " ");
+}
+
+function featureMeaning(name, pct) {
+  if (name === "ext_spectral_centroid") {
+    return pct <= 0.30 ? "slow compared with atlas examples" : pct >= 0.70 ? "fast compared with atlas examples" : "typical speed";
+  }
+  if (name === "ext_trend_strength") {
+    return pct >= 0.75 ? "strong drift marker" : pct <= 0.25 ? "weak drift marker" : "moderate drift marker";
+  }
+  if (name === "dfa_alpha") {
+    return pct >= 0.65 ? "persistent / long-memory marker" : "not a strong persistence marker";
+  }
+  if (name === "ac_timescale") {
+    return pct >= 0.65 ? "long memory trace" : "shorter memory trace";
+  }
+  if (name === "ext_volatility_ac1") {
+    return pct >= 0.65 ? "fluctuation size has memory" : "weak volatility memory";
+  }
+  if (name === "snr_db") {
+    return pct >= 0.70 ? "cleaner than many atlas examples" : pct <= 0.30 ? "noisier than many atlas examples" : "typical noise level";
+  }
+  return "position among atlas examples";
+}
+
+function percentileLabel(pct) {
+  return `${(pct * 100).toFixed(0)}%`;
+}
+
+function formatFamilies(raw) {
+  if (!raw) return "";
+  return raw
+    .split(";")
+    .map(item => {
+      const [family, weight] = item.split(":");
+      const pct = Number(weight);
+      const label = family.replaceAll("_", " ");
+      return Number.isFinite(pct) ? `${label} (${(pct * 100).toFixed(0)}%)` : label;
+    })
+    .join(", ");
 }
 
 function escapeHtml(text) {

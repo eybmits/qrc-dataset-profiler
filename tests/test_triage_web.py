@@ -37,6 +37,8 @@ def test_html_page_contains_upload_form_and_api_route():
     assert "QRC Regime Triage" in html
     assert "/api/triage" in html
     assert "fileInput" in html
+    assert "Check QRC Priority" in html
+    assert "Markers for QRC advantage" in html
 
 
 def test_web_payload_returns_triage_report():
